@@ -1,0 +1,25 @@
+{
+  "name": "telemetry-ground-station",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CCSDS-inspired educational telemetry synchronization and recovery demo",
+  "type": "module",
+  "engines": {
+    "node": "22.19.0"
+  },
+  "packageManager": "npm@10.9.3",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "ws": "8.18.3"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.0",
+    "@types/ws": "8.18.1",
+    "tsx": "4.20.5",
+    "typescript": "5.9.2",
+    "vite": "7.1.3"
+  }
+}
