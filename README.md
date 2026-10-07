@@ -8,8 +8,9 @@ The receiver is the technical focus; the eventual browser dashboard is an observ
 and the seven-round roadmap. The custom 256-byte frame is CCSDS-inspired, not a
 fully standards-compliant CCSDS TM Transfer Frame.
 
-Round 1 contains configuration and directory placeholders only. Protocol primitives,
-receiver, transmitter, tests, and UI are scheduled for subsequent rounds.
+Round 2 implements protocol constants/types, CRC-16, telemetry payload encoding and
+decoding, and the exact 256-byte frame encoder/decoder with validation and unit tests.
+Receiver synchronization, UDP transport, simulator, WebSocket, and UI remain future work.
 
 Use Node.js **22.19.0** and npm **10.9.3**. Install the locked dependencies with:
 
@@ -21,14 +22,36 @@ The stack is TypeScript, Node Buffer, `node:dgram`, a project-owned CRC implemen
 `ws`, Vite with vanilla HTML/CSS/TypeScript, and `node:test` / `node:assert`.
 There is one package, with `ws` as its only external runtime dependency.
 
-`src/shared/` will hold protocol primitives; `src/transmitter/` the simulator and UDP
+`src/shared/` holds protocol primitives; `src/transmitter/` will hold the simulator and UDP
 sender; `src/receiver/` the persistent BitBuffer, FSM, UDP input, metrics, and WebSocket
 bridge; `test/` the automated tests; and `ui/` the future Vite dashboard.
 
-The configured `npm run typecheck` and `npm test` commands become usable in Round 2,
-when TypeScript source and test files exist. At Round 1, typechecking reports no
-inputs and no protocol tests exist. Receiver, transmitter, and UI run scripts will be
-added alongside their implementations, rather than pointing at missing entry files.
+Run the implemented checks with:
+
+```text
+npm test
+npm run typecheck
+```
+
+The tests use Node's native test runner via `tsx`. Receiver, transmitter, and UI run
+scripts will be added alongside their implementations.
+
+`encodeTelemetry(values)` produces the 12-byte big-endian demo payload.
+`encodeFrame({ sequence, payload, flags? })` accepts a Buffer of 0..246 meaningful
+bytes, derives its declared length, defaults flags to zero, pads unused bytes with
+zero, and appends CRC. It returns only the frame body, without ASM.
+
+`validateFrame(body)` reports stored/calculated CRC and separate CRC/format validity.
+`decodeFrame(body)` also returns header fields and an owned copy of meaningful
+payload bytes. Both require exactly 256 bytes. An oversized declared payload length
+is flagged as invalid and returns no payload bytes. Decoded telemetry is present only
+when CRC and format are valid and at least 12 meaningful bytes exist. Short payloads
+remain structurally valid; padding is never decoded as telemetry. The standalone
+`decodeTelemetry(payload)` requires at least 12 bytes and reads the first 12.
+
+Encoder numeric inputs are range-checked; temperature is rounded with `Math.round`
+to signed int16 centi-degrees. Other wire fields require integers. Nonzero uint16
+flags are supported by the primitive; the MVP demo will use zero.
 
 Telemetry frames must be reconstructed independently of UDP message boundaries.
 The simulator chooses fragmentation; UDP itself delivers datagrams. CRC detects
