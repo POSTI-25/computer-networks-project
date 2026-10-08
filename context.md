@@ -1,7 +1,7 @@
 # Project Development Context
 
 ## Source of Truth
-- `prd.md` (read completely, all 36 sections, before changes in Rounds 1–3).
+- `prd.md` (read completely, all 36 sections, before changes in Rounds 1–4).
 - `context.md` tracks implementation progress but does not override `prd.md`.
 - Update this file at the end of every development round; preserve decisions and report only implemented behavior and executed checks.
 
@@ -15,7 +15,7 @@ Build a small software-only Computer Networks telemetry simulation: mock spacecr
 - CRC-controlled validation and recovery; failed frames never become valid telemetry.
 - Automatic resynchronization after corruption and false ASM candidates.
 - Recovery after changed bit alignment without restarting.
-- The chunk-fed receiver core implements persistent buffering, bit-level ASM detection, FSM validation/rejection, and automatic recovery. Actual UDP integration and deliberate bit-slip fault simulation remain later work. UDP, CRC, FSMs, ASM concepts/value, Node.js, TypeScript, Buffer, WebSockets, and dashboards are standard building blocks. The specific receiver-side combination is the technical focus, not a proven patent claim.
+- The persistent receiver core is now integrated with real UDP payloads; bit-level detection, FSM validation/rejection, and recovery retain their Round 3 semantics. Deliberate bit-slip simulation remains Round 5 work. UDP, CRC, FSMs, ASM concepts/value, Node.js, TypeScript, Buffer, WebSockets, and dashboards are standard building blocks. The receiver-side combination is the technical focus, not a proven patent claim.
 
 ## Locked Technical Decisions
 - ASM: `0x1ACFFC1D`, transmitted MSB-first as `00011010110011111111110000011101`; 32 bits, immediately preceding and outside the frame body.
@@ -35,11 +35,11 @@ Build a small software-only Computer Networks telemetry simulation: mock spacecr
 
 ## Current Architecture
 - Initially the directory contained only `prd.md`; no source, package configuration, tests, existing documentation, or Git repository was present. The IDE-mentioned `deep-research-report.md` was not found on disk.
-- One private ESM npm package with strict NodeNext TypeScript configuration for backend/tests. `src/shared` contains binary primitives; `src/receiver` contains BitBuffer and the transport-independent Synchronizer. Native tests cover both layers; bit-string helpers exist only under `test`.
-- `Synchronizer.push(Buffer)` returns zero or more validated `{ frame, bitAlignment, asmBitOffset }` results. The future UDP receiver will feed payload bytes into this API. No UDP socket, transmitter, simulator, WebSocket server, or UI exists. UI configuration will be added in Round 6, separate from Node typechecking.
+- One private ESM npm package with strict NodeNext TypeScript configuration. Shared binary/config modules -> FrameBuilder -> streaming Packetizer -> udp4 sender -> udp4 receiver -> unchanged persistent Synchronizer -> valid-frame callback/console. Native tests cover primitives, synchronization, packetization, configuration, and actual localhost sockets; bit-string helpers remain test-only.
+- `Synchronizer.push(Buffer)` returns validated `{ frame, bitAlignment, asmBitOffset }` results. Each received UDP payload goes straight into the same Synchronizer, without marker search or frame parsing in the socket handler. No production fault simulator, full metrics, WebSocket server, or UI exists. UI configuration remains Round 6 work.
 
 ## Current Phase
-Round 3 complete — Bit-level synchronization core. Do not begin Round 4 without explicit user instruction.
+Round 4 complete — UDP transport and clean fragmented-stream integration. Do not begin Round 5 without explicit user instruction.
 
 Seven-round development plan (user roadmap; groups the PRD's implementation phases):
 1. Understanding/foundation: inspect, read PRD, establish tooling/layout/context, document inconsistencies.
@@ -63,9 +63,18 @@ Seven-round development plan (user roadmap; groups the PRD's implementation phas
 - Synchronizer: persistent chunk input, HUNT/LOCK/VERIFY/EXTRACT states, every-bit ASM hunting, incomplete-candidate waiting, shared CRC/format checks, valid-only extraction, exact successful-unit consumption, direct LOCK on adjacent ASM, one-bit-after-failed-ASM resynchronization.
 - Internal snapshot counters/state: ASM detections, valid frames, CRC/format failures, candidate alignment, resyncCount, bufferResets, bufferedBits, storageBytes. Optional synchronous transition observer; no retained event history or rate metrics.
 - Bounded noise hunting (<=31 trailing bits), 4 KiB input batching for arbitrary large pushes, safe capacity-fault reset and current-batch recovery with recorded reason and preserved stream position.
-- No UDP, production fault simulator, throughput/FPS or sequence-gap metrics, WebSocket, or UI implemented. Full bit insertion/deletion recovery demonstrations remain Round 5.
+- FrameBuilder generates deterministic 12-byte mock telemetry through the shared encoder, prepends ASM outside the body, starts sequence at zero, and wraps uint32. Build one unit explicitly or use stateful `.next()`.
+- Streaming Packetizer uses project-owned Mulberry32; default seed 42 and chunk bounds 1..96 bytes. Retains a partial chunk and RNG state across frame generation calls, so boundaries cross logical units. Finite `packetize()` and `flush()` preserve all bytes, with no padding; final tail may be shorter than minimum.
+- UDP receiver/sender use node:dgram udp4 on default 127.0.0.1:5000. Receiver increments udpDatagramsReceived/udpBytesReceived and passes msg unchanged into its persistent Synchronizer; accepted outputs use a simple callback/console log, with no retained frame history.
+- Clean CLI processes and `npm run receiver` / `npm run transmitter`; environment UDP_HOST, UDP_PORT, FRAME_RATE, CHUNK_MIN_BYTES, CHUNK_MAX_BYTES, SIM_SEED, using shared PRD defaults. Default generation rate 5 FPS; signal handlers stop timers and close sockets; transmitter flushes its pending tail on normal shutdown.
+- No production fault simulator, throughput/FPS or sequence-gap metrics, WebSocket, or UI implemented. Full bit insertion/deletion recovery demonstrations remain Round 5.
 
 ## Tests Passing
+- Round 4 final `npm test`: 107 passed, 0 failed/skipped/cancelled (all 80 prior tests plus 27 new: 9 packetizer, 5 frame-builder, 4 configuration, 9 integration/lifecycle). `npm run typecheck` passed after correcting a new test's empty-array narrowing assertion. All four prior test files are hash-verified unchanged.
+- Packetizer tests: exact reassembly, same/different fixed seeds, range bounds/final short tail, tiny 1..3 chunks, boundaries independent of upstream append segmentation, seed 0/max uint32, invalid options, empty input, owned output bytes.
+- Frame/config tests: external ASM + exact valid body, deterministic mock wire values, sequence 0..99 and max->0 wrap, initial bounds; PRD environment defaults/overrides, numeric validation, receiver ignoring transmitter-only settings.
+- Direct integration: 100 generated frames through seeded 1..96-byte chunks recovered sequences 0..99 and exact telemetry, zero CRC/format failures; explicit 2-byte split ASM and body over 128 chunks; mixed frame/ASM/body boundaries; streaming tail preserved across `.next()` calls.
+- Real localhost UDP: 100 clean frames recovered in order with exact telemetry, zero CRC/format failures, datagram count equal to sent chunks, byte count 26000; explicit ASM split/body across 130 datagrams; mixed boundaries including multiple units in a datagram; partial candidate stays LOCK until final byte; bind conflict reports EADDRINUSE; idempotent close. Tests use receiver port 0 and always close sender/receiver.
 - Round 3 final `npm test` run: 80 tests passed, 0 failed/skipped/cancelled. Includes all 25 unchanged Round 2 tests, 28 BitBuffer tests, and 27 Synchronizer tests. `npm run typecheck` passed (exit 0); native test runner used approved child-process access.
 - BITBUF-1..8: MSB ordering, partial head/discard, append preserving tail, uint32 match at every alignment 0..7 and larger offsets, exact 2048-bit extraction at each alignment, cross-append markers, compaction with residual bits. Additional checks: bounds, uint32 sign bit, empty/reused buffers, owned copies, geometric tiny appends, cap enforcement and reuse.
 - SYNC-1..11: all four state transitions, noise hunting, alignments 0..7 with one-byte chunks and exact decoded output, split ASM, fragmented frame, incomplete LOCK waiting, CRC rejection/later recovery, false candidates, consecutive direct LOCK, CRC-valid invalid-length rejection, and 1 MiB noise with exactly 31 retained bits then recovery.
@@ -80,7 +89,7 @@ Seven-round development plan (user roadmap; groups the PRD's implementation phas
 - PRD SHA-256 remained `C3281BED9A697503097909F10CB3797C435FEA86F5DE59D59CCB6955C94E0FDB` throughout edits.
 
 ## Known Issues
-- No known defects in the binary primitives or synchronization core. UDP transport, simulator, full metrics, WebSocket/UI, network integration tests, and demo commands remain future work by design.
+- No known defects in binary primitives, synchronization core, or clean UDP path. Production impairments, full metrics, WebSocket/UI, and final demo documentation remain later work by design. UDP is interpreted in arrival order, with no reliability/reorder mechanism.
 - No existing-code/spec contradiction found. The PRD's eight implementation phases and the user's seven rounds describe compatible ordering, with BitBuffer/FSM grouped in Round 3 and WebSocket/UI grouped in Round 6.
 - Round 2 request resolved short-payload decoding: lengths 0..11 are structurally valid with telemetry omitted. A later WebSocket publication policy for such non-default payloads still needs documentation; default demo frames contain 12 bytes.
 - Sequence gaps require unsigned wraparound, but treatment of repeated/older valid sequences is not fully specified; document/test a forward-sequence policy when implementing metrics.
@@ -99,19 +108,31 @@ Seven-round development plan (user roadmap; groups the PRD's implementation phas
 - VERIFY uses shared decodeFrame once and requires both CRC and format validity before EXTRACT, as specified in the Round 3 request. CRC failure takes precedence if both flags are false; formatFailures counts only CRC-valid bad-length candidates. Failure discards exactly one bit at candidate head; success emits then discards exactly 2080 bits.
 - resyncCount increments on the first ASM found after each failed candidate, even if that new candidate fails; the pending reacquisition flag clears at acquisition. Noise without failed validation does not count. Counts are tested; full receiver rate/sequence metrics remain later work.
 - Optional transition observer is synchronous and observational (do not reenter push); no event history retained. Tests collect their own histories. Public stats return a copy and expose storage allocation for bounded-memory checks.
-- Round 2 frame API accepts raw payload Buffers; callers use `encodeTelemetry` for the default demo. Deriving length from the Buffer avoids inconsistent encoder header/payload input. No ASM wrapper implemented yet.
+- Round 2 frame API accepts raw payload Buffers; callers use `encodeTelemetry` for the default demo. Deriving length from the Buffer avoids inconsistent header/payload input. Round 4 FrameBuilder prepends ASM outside the unchanged encoded body.
 - Temperatures use `Math.round(Celsius * 100)` and validate the quantized signed int16 result; other fields must be integral and within their unsigned ranges. No automatic sequence wrap in encoder; generator owns wraparound later.
 - CRC and format flags remain independent, including CRC-valid but format-invalid candidates. Bad CRC/format does not throw on a correctly sized body; decoded telemetry is suppressed. Caller must check both flags before accepting any frame.
 - Decoded payload is an owned copy containing meaningful bytes only. Short valid payloads omit telemetry; malformed declared lengths produce no payload. These choices are documented/tested and leave future FSM control flow explicit.
+- Round 4 Mulberry32 retains uint32 PRNG state, including seed zero. Packetizer holds fewer bytes than its next selected chunk size between pushes; streaming segmentation matches one-shot packetization when flush is only at end. Explicit seed/bounds plus source stream determine boundaries.
+- Live generation does NOT flush per frame: partial datagrams can bridge units. The latest frame may wait one generation tick for its last bytes at default bounds; flush finishes finite/normal-stop streams. No stream padding or forced per-frame boundaries.
+- Mock telemetry: temperature `(2400 + sequence % 100)/100`, battery `7420 - sequence % 20`, altitude `520000 + sequence % 1000`, uptime `sequence`. Uptime is a simulated counter, not elapsed host seconds; formula and sequence wrap are deterministic.
+- Sender awaits send callbacks sequentially and yields with setImmediate between datagrams to allow local receive I/O; no ACKs, retries, reorder buffer, or rate metrics. CLI uses a simple abortable timer with send duration deducted from interval.
+- Actual UDP tests bind localhost port 0, then use the assigned port; callback outputs are collected only in tests. Deadline polling checks receive completion without a 5-FPS test delay. Socket factories are importable; CLI entry guards prevent startup during imports. Socket errors are process-level, while protocol conditions remain Synchronizer events.
+- No Round 3 synchronization bug was exposed; BitBuffer/Synchronizer and all prior tests remained unchanged. Only shared constants were extended with existing PRD configuration defaults; no locked value/format/CRC/FSM behavior changed.
 
 ## Files Added / Changed
 - Round 1 foundation retained: package/lock/config, Node pin, ignore rules, and remaining placeholders.
 - Round 2 added `src/shared/constants.ts`, `types.ts`, `crc16.ts`, `frame.ts`, `test/crc16.test.ts`, and `test/frame.test.ts`; removed obsolete `.gitkeep` in populated shared/test directories.
 - Round 3 added `src/receiver/bitBuffer.ts`, `synchronizer.ts`, `test/bitBuffer.test.ts`, `synchronizer.test.ts`, and `bitHelpers.ts`; removed receiver `.gitkeep`; updated `README.md` and `context.md`.
 - `prd.md`, Round 2 code/tests, package scripts/dependencies/lock, and TypeScript configuration unchanged in Round 3. Installed `node_modules/` remains ignored.
+- Round 4 added `src/shared/config.ts`, `src/transmitter/frameBuilder.ts`, `packetizer.ts`, `index.ts`, `src/receiver/index.ts`, and `test/config.test.ts`, `frameBuilder.test.ts`, `packetizer.test.ts`, `integration.test.ts`. Removed transmitter `.gitkeep`.
+- Round 4 updated shared constants (PRD defaults only), package.json (two CLI scripts), README.md, context.md. Protocol implementations, prior tests, PRD, dependency versions/lock, and tsconfig remain unchanged.
+
+## Manual Verification
+- Performed on 2026-10-08 (Asia/Calcutta): separate `npm run receiver` and `npm run transmitter` sessions, defaults 127.0.0.1:5000, seed 42, configured 5 FPS. Receiver printed continuous valid sequences 0..102 with expected telemetry; transmitter printed varying per-tick chunk counts.
+- Both sessions stopped with Ctrl+C. Read-only system verification found 0 remaining receiver/transmitter demo processes and 0 UDP endpoints on port 5000. No demo child/socket left running. Exact throughput was not instrumented or claimed.
 
 ## Next Phase
-Round 4: UDP transmitter + UDP receiver + arbitrary logical-stream packetization + clean end-to-end fragmentation testing. Generate sequence/telemetry frames through shared primitives, prepend ASM outside the body, accumulate the outgoing logical stream, deterministically chunk into 1..96-byte payloads (seed 42 default), and send over localhost udp4. Feed every received message payload into the same persistent Synchronizer, process returned valid frames, and prove reconstruction over actual UDP including split markers/bodies and 100 clean frames with zero CRC failures. Add entry points/run scripts only with real implementations. No production impairment modes, WebSocket, or UI yet; update context after actual tests.
+Round 5: fault injection + corruption + non-byte-aligned stream + bit-slip simulation + automatic recovery + novelty-focused integration tests. Add clean/bit-offset/bit-flip/bit-slip simulator modes before byte packetization, preserving bitstream carry across generation calls. Prove offsets 1..7, CRC-controlled rejection, false-lock recovery, insertion/deletion changing later alignment, automatic reacquisition without restart, and bounded memory through deterministic direct and UDP tests. Preserve all prior tests and the one-bit recovery rule; optional drop/reorder only after mandatory modes. Do not build WebSocket or UI yet; update context with actual verification.
 
 ## Do Not Forget
 - PRD wins over code/docs; no specification edits to accommodate implementation.

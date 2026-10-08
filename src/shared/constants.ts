@@ -28,3 +28,11 @@ export const UPTIME_OFFSET = 8;
 export const CRC_POLYNOMIAL = 0x1021;
 export const CRC_INITIAL_VALUE = 0xffff;
 export const CRC_FINAL_XOR = 0x0000;
+
+// PRD sections 6, 10, 11, and 22: localhost clean-link defaults.
+export const DEFAULT_UDP_HOST = '127.0.0.1';
+export const DEFAULT_UDP_PORT = 5000;
+export const DEFAULT_FRAME_RATE = 5;
+export const DEFAULT_CHUNK_MIN_BYTES = 1;
+export const DEFAULT_CHUNK_MAX_BYTES = 96;
+export const DEFAULT_SIM_SEED = 42;
