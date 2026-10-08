@@ -2,23 +2,25 @@ import { once } from 'node:events';
 import { WebSocket, WebSocketServer } from 'ws';
 import type { ReceiverMetrics, ReceiverMessage, StatusMessage, ValidFrameMessage } from '../shared/observability.js';
 import type { SynchronizedFrame } from './synchronizer.js';
+import { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from '../shared/constants.js';
 
 export const STATUS_INTERVAL_MS = 250;
-export const DEFAULT_WS_PORT = 8080;
-export const DEFAULT_WS_HOST = '127.0.0.1';
+export { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from '../shared/constants.js';
 
 export function statusMessage(metrics: ReceiverMetrics): StatusMessage {
   return { type: 'receiver.status', timestamp: new Date().toISOString(), metrics };
 }
 
 export function validFrameMessage({ frame, bitAlignment }: SynchronizedFrame): ValidFrameMessage | null {
-  // Short structurally valid payloads are counted but contain no demo telemetry.
-  // Suppress their telemetry event rather than inventing values or changing the PRD schema.
-  if (!frame.crcValid || !frame.formatValid || !frame.telemetry) return null;
-  const { temperatureC, batteryMv, altitudeM, uptimeSeconds } = frame.telemetry;
+  if (!frame.crcValid || !frame.formatValid) return null;
+  // PRD requires an event for every valid frame. Preserve all keys without decoding padding.
+  // The PRD does not define unavailable telemetry values; null explicitly represents absence.
   return { type: 'frame.valid', timestamp: new Date().toISOString(), frame: {
     sequence: frame.sequence, payloadLength: frame.payloadLength,
-    temperatureC, batteryMv, altitudeM, uptimeSeconds, bitAlignment,
+    temperatureC: frame.telemetry?.temperatureC ?? null,
+    batteryMv: frame.telemetry?.batteryMv ?? null,
+    altitudeM: frame.telemetry?.altitudeM ?? null,
+    uptimeSeconds: frame.telemetry?.uptimeSeconds ?? null, bitAlignment,
   } };
 }
 

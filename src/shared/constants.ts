@@ -36,3 +36,5 @@ export const DEFAULT_FRAME_RATE = 5;
 export const DEFAULT_CHUNK_MIN_BYTES = 1;
 export const DEFAULT_CHUNK_MAX_BYTES = 96;
 export const DEFAULT_SIM_SEED = 42;
+export const DEFAULT_WS_HOST = '127.0.0.1';
+export const DEFAULT_WS_PORT = 8080;

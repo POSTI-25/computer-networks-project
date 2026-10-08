@@ -48,7 +48,7 @@ export function decodeTelemetry(payload: Buffer): TelemetryPayload {
   };
 }
 
-// Produces the 256-byte body only. Packetization will prepend ASM in a later round.
+// Produces the 256-byte body only. FrameBuilder prepends the external ASM.
 export function encodeFrame({ sequence, payload, flags = 0 }: FrameInput): Buffer {
   requireInteger('sequence', sequence, 0, 0xffffffff);
   requireInteger('flags', flags, 0, 0xffff);
@@ -65,7 +65,7 @@ export function encodeFrame({ sequence, payload, flags = 0 }: FrameInput): Buffe
   return frame;
 }
 
-// Validation failures are data for the future FSM, not fatal protocol exceptions.
+// Validation failures drive FSM rejection/reacquisition, not fatal protocol exceptions.
 // Wrong-sized input is a caller error: synchronization must first extract 256 bytes.
 export function validateFrame(frame: Buffer): FrameValidation {
   requireFrameSize(frame);

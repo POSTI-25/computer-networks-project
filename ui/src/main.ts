@@ -49,10 +49,10 @@ function render(message: ReceiverMessage): void {
     previousFrameAlignment = frame.bitAlignment;
     log(events);
     display('sequence', frame.sequence);
-    display('temperatureC', `${frame.temperatureC.toFixed(2)} °C`);
-    display('batteryMv', `${frame.batteryMv} mV`);
-    display('altitudeM', `${frame.altitudeM} m`);
-    display('uptimeSeconds', `${frame.uptimeSeconds} s`);
+    display('temperatureC', frame.temperatureC === null ? '—' : `${frame.temperatureC.toFixed(2)} °C`);
+    display('batteryMv', frame.batteryMv === null ? '—' : `${frame.batteryMv} mV`);
+    display('altitudeM', frame.altitudeM === null ? '—' : `${frame.altitudeM} m`);
+    display('uptimeSeconds', frame.uptimeSeconds === null ? '—' : `${frame.uptimeSeconds} s`);
     display('latestAlignment', frame.bitAlignment);
   }
 }

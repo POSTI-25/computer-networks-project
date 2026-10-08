@@ -1,42 +1,64 @@
 # Simulated Telemetry Ground Station
 
-A software-only Computer Networks course project demonstrating application framing,
-bit-level synchronization, CRC rejection, and automatic recovery above UDP.
-The receiver is the technical focus; the browser dashboard is an observer.
+A software-only Computer Networks project: mock spacecraft telemetry is framed,
+impaired, and deliberately fragmented across UDP datagrams. A persistent ground
+receiver searches every bit for the ASM, verifies CRC, rejects damaged frames, and
+automatically reacquires synchronization. A small browser dashboard observes it.
+`prd.md` is authoritative; `context.md` records implementation and final evidence.
 
-`prd.md` is the authoritative specification. `context.md` records development progress
-and the seven-round roadmap. The custom 256-byte frame is CCSDS-inspired, not a
-fully standards-compliant CCSDS TM Transfer Frame.
+## Technical focus and architecture
 
-Round 6 includes the synchronization/recovery core, UDP link, deterministic bit
-impairments, receiver metrics, WebSocket bridge, and minimal ground-station dashboard.
-Final integration, PRD audit, demonstration hardening, and cleanup remain Round 7.
+The protected behavior is persistent UDP-independent buffering, bit-level ASM search
+at alignments 0–7, explicit HUNT/LOCK/VERIFY/EXTRACT states, CRC-controlled acceptance,
+one-bit-after-failed-ASM resynchronization, and recovery after changed bit alignment.
+UDP, CRC, FSMs, CCSDS ASM concepts, and WebSockets are standard building blocks.
 
-Use Node.js **22.19.0** and npm **10.9.3**. Install the locked dependencies with:
+```text
+FrameBuilder -> BitstreamSimulator -> Packetizer -> UDP sender
+    -> UDP receiver -> persistent BitBuffer -> Synchronizer FSM
+    -> CRC / frame decoder -> accepted frames -> Metrics -> WebSocket -> Dashboard
+```
+
+HUNT scans every bit and retains at most 31 trailing bits. LOCK waits for all 2080
+candidate bits. VERIFY extracts/checks the body; EXTRACT emits and consumes a valid
+unit. Failed CRC or format validation resumes search one bit after the failed ASM
+start, including markers inside the rejected candidate. Receiver storage is capped
+at 64 KiB and compacted; the FSM processes large input in 4 KiB batches.
+
+WebSocket is only the ground-to-browser observer link. The receiver continues without
+browser clients, and never receives simulator fault locations or alignment hints.
+
+## Stack and installation
+
+Node.js **22.19.0** (LTS), npm **10.9.3**, TypeScript, Node Buffer, `node:dgram`,
+project-owned CRC/BitBuffer, `ws`, Vite, vanilla HTML/CSS/TypeScript, and `node:test`.
+One package; `ws` is the only external runtime dependency.
 
 ```text
 npm ci
 ```
 
-The stack is TypeScript, Node Buffer, `node:dgram`, a project-owned CRC implementation,
-`ws`, Vite with vanilla HTML/CSS/TypeScript, and `node:test` / `node:assert`.
-There is one package, with `ws` as its only external runtime dependency.
+## Frame format
 
-`src/shared/` holds protocol primitives and configuration; `src/transmitter/` holds
-frame generation, packetization, and UDP sending; `src/receiver/` holds UDP input,
-BitBuffer, FSM, metrics, and WebSocket bridge. `test/` holds automated tests;
-`ui/` is a single-page vanilla TypeScript/Vite dashboard.
+External ASM: **0x1ACFFC1D**, 32 bits, MSB-first. It precedes the custom **256-byte**
+body; the clean transmission unit is 260 bytes / 2080 bits. Integers are big-endian.
 
-Run the implemented checks with:
+| Body bytes | Field |
+|---|---|
+| 0–3 | uint32 sequence |
+| 4–5 | uint16 payloadLength, 0–246 |
+| 6–7 | uint16 flags, default 0 |
+| 8–253 | 246-byte payload, unused bytes zero-filled |
+| 254–255 | CRC-16, big-endian, covering body bytes 0–253 |
 
-```text
-npm test
-npm run typecheck
-npm run build
-```
+Default meaningful payload is 12 bytes: signed int16 centi-degree temperature,
+uint16 battery millivolts, uint32 altitude metres, uint32 uptime seconds.
+CRC parameters: polynomial `0x1021`, initial `0xFFFF`, refin/refout false, xorout
+`0x0000`; ASCII `123456789` gives `0x29B1`.
 
-The tests use Node's native test runner via `tsx`, including localhost UDP tests on
-ephemeral ports. Run the clean dashboard demo in three terminals, receiver first:
+## Running and demonstrations
+
+Use three terminals, starting the receiver first:
 
 ```text
 npm run receiver
@@ -44,132 +66,95 @@ npm run transmitter -- --mode clean
 npm run ui
 ```
 
-Open **http://127.0.0.1:5173**. The receiver also listens on **ws://127.0.0.1:8080**.
-The page shows connection, FSM/sync/current alignment, latest valid telemetry/alignment,
-valid/CRC/gap/recovery/datagram counters, rates, buffered bits, and the latest 20 events.
-Stop the transmitter first with Ctrl+C, then the receiver and Vite. The transmitter deliberately packetizes one logical stream into
-arbitrary UDP datagrams; UDP delivers each datagram intact to the application.
+Open **http://127.0.0.1:5173**. UDP defaults to **127.0.0.1:5000** and WebSocket to
+**ws://127.0.0.1:8080**. Stop the transmitter first with Ctrl+C, then receiver and Vite.
+The page shows connection, FSM/sync/alignment, valid telemetry, counters, rates,
+buffered bits, and the latest 20 local events. It sends no control commands.
 
-Choose one transmitter mode per demo stream (start a fresh receiver for each new demo):
+For each distinct demo stream, restart the receiver and run one transmitter command.
+The browser reconnects automatically. Recovery within each demo requires no restart.
 
-```text
-npm run transmitter -- --mode clean
-npm run transmitter -- --mode bit-offset --offset 3
-npm run transmitter -- --mode bit-flip
-npm run transmitter -- --mode bit-insert
-npm run transmitter -- --mode bit-delete
-```
+| Demo / mode | Transmitter command | Expected evidence |
+|---|---|---|
+| Fragmentation / clean | `npm run transmitter -- --mode clean` | Seeded 1–96-byte datagrams; telemetry continues, zero CRC failures/gaps |
+| Nonaligned ASM / bit-offset | `npm run transmitter -- --mode bit-offset --offset 3` | ASM acquired at alignment 3; telemetry continues |
+| CRC rejection / bit-flip | `npm run transmitter -- --mode bit-flip` | Sequence 5 rejected, 6 and later accepted; CRC/gap/resync each +1 |
+| Changed alignment / bit-insert | `npm run transmitter -- --mode bit-insert` | Sequence 5 rejected; alignment 0 → 1; later frames accepted |
+| Changed alignment / bit-delete | `npm run transmitter -- --mode bit-delete` | Sequence 5 rejected; alignment 0 → 7; later frames accepted |
+| Insertion alias / bit-slip | `npm run transmitter -- --mode bit-slip` | Same behavior as bit-insert |
 
-For flip/insert/delete demos, sequence 5 is rejected; sequence 6 and later telemetry
-continue. CRC Failures, Frame Sequence Gaps, and Resynchronizations each increase by 1.
-Insertion changes alignment 0 -> 1; deletion changes 0 -> 7. Allow browser reconnection
-after restarting the receiver between distinct demo streams. No controls send commands
-back to the transmitter; the browser is read-only.
+Fault defaults: one fault at zero-based clean frame index **5**, body bit **80**
+(body byte 10 MSB), after CRC generation. Override with `--target-frame 1 --body-bit 80`.
+Body bit range is 0–2031, excluding ASM and stored CRC. Index equals sequence for
+the default generator until uint32 wraparound. Insertion adds `1` before the target;
+deletion removes it. Prefix mode uses alternating `101...`, with offset 1–7.
 
-Status uses only `receiver.status` at most 4/sec; accepted telemetry uses `frame.valid`
-with UTC ISO timestamps. Rates are count deltas divided by actual sample elapsed time,
-so short samples can fluctuate around the configured 5 FPS. Current alignment is null
-in HUNT; Latest Valid Alignment retains the last decoded frame's alignment. Events are
-derived from sampled counter/state changes and frame messages; the console captures
-transient FSM states that can occur between status samples. Reconnect clears old values
-until new observations arrive; no server replay or persistent history is kept.
+The simulator carries unfinished bits across generation calls; Packetizer retains
+unfinished datagrams and Mulberry32 state. Neither flushes per frame. Only final
+shutdown pads the last partial byte and flushes the remaining datagram. A frame's
+last bytes can wait one generation tick for the next unit. SIM_SEED controls chunk
+boundaries; explicit fault locations require no random targeting or CRC repair.
 
-Sequence gaps use valid extracted frames and uint32 wraparound. Duplicates, older
-sequences, and ambiguous half-range jumps do not move the latest forward baseline.
-Forward advances smaller than 2^31 add `advance - 1` missing frames. They measure
-missing valid frame observations, not missing UDP datagrams. Structurally valid payloads
-shorter than 12 bytes count toward valid frames/sequence tracking but produce no telemetry
-WebSocket event, because they cannot populate the required telemetry schema.
+## Configuration and observation semantics
 
-Bit-offset prefixes alternating `101...` bits, default 3, configurable 1..7.
-Flip/insert/delete perform one fault at zero-based clean frame index 5, body bit 80
-(MSB of body byte 10), after CRC generation. Override with `--target-frame 1 --body-bit 80`;
-body bit range is 0..2031, excluding ASM and stored CRC. Frame index equals sequence
-for the default generator starting at zero, until uint32 wraparound. Insert adds a `1`
-before the selected bit; delete removes that bit; `bit-slip` aliases insertion.
-Fault locations are explicit; SIM_SEED controls packet boundaries, not fault targeting.
-
-The pipeline is FrameBuilder -> BitstreamSimulator -> Packetizer -> UDP. The simulator
-packs MSB-first and carries up to seven unfinished bits across generation calls.
-Only final shutdown zero-pads a partial byte, then flushes the packetizer. Insertion
-and deletion permanently change later ASM alignment by +1 or -1 modulo 8. They model
-loss of alignment in the logical telemetry stream before UDP packetization; ordinary
-UDP sockets do not expose RF bit slips. The receiver gets bytes only and automatically
-hunts again after CRC rejection, with no receiver restart or simulator metadata.
-FSM console lines show acquisitions, failure -> HUNT, and the new alignment.
-
-Environment configuration (PowerShell: `$env:FRAME_RATE = '10'`, then run the command):
-
-| Variable | Default |
+| Environment variable | Default |
 |---|---|
 | UDP_HOST | 127.0.0.1 |
 | UDP_PORT | 5000 |
 | WS_PORT | 8080 |
 | FRAME_RATE | 5 |
-| CHUNK_MIN_BYTES | 1 |
-| CHUNK_MAX_BYTES | 96 |
+| CHUNK_MIN_BYTES / CHUNK_MAX_BYTES | 1 / 96 |
 | SIM_SEED | 42 |
 
-WS_PORT overrides the receiver's local bridge. If changed, update the obvious
-`WEBSOCKET_URL` constant in `ui/src/main.ts` to match. Vite stays on localhost:5173.
-`npm run build` writes the production UI to `dist/ui/`. No new dependencies are required.
+PowerShell example: `$env:CHUNK_MAX_BYTES = '16'` before starting the transmitter.
+Changing WS_PORT also requires updating the obvious `WEBSOCKET_URL` constant in
+`ui/src/main.ts`. Vite stays on localhost:5173; `npm run build` writes `dist/ui/`.
 
-Packetization uses project-owned Mulberry32 with a uint32 seed. The streaming
-Packetizer retains its unfinished datagram and PRNG state across generated frames,
-so datagrams may mix one frame's tail with the next ASM/body. Final `flush()` sends
-the remaining bytes without padding, potentially shorter than the configured minimum.
-Holding that tail can delay completion of the latest frame until the next generation
-tick; a normal transmitter shutdown flushes it. The sender yields between datagrams
-for local receive I/O, with no acknowledgements, reordering, or retransmission.
+Only `receiver.status` (at most 4/sec) and `frame.valid` (every valid extracted frame)
+are published, with ISO UTC timestamps. Rates use count deltas / actual elapsed
+time, so short samples fluctuate around 5 FPS. Synced is false only in HUNT; current
+alignment is null when no candidate is known. Latest Valid Alignment remains visible.
+Counters/events show recovery even when status sampling misses brief FSM transitions.
 
-Mock values depend only on sequence: temperature `(2400 + sequence % 100) / 100`,
-battery `7420 - sequence % 20`, altitude `520000 + sequence % 1000`, uptime `sequence`.
-Uptime is a simulated counter, not measured wall-clock runtime. Generated sequences
-start at zero and wrap as uint32. The receiver counts datagrams and bytes, passes every
-payload unchanged to its persistent Synchronizer, and logs accepted frames.
+Frame Sequence Gaps count missing valid frame observations, not missing UDP datagrams.
+Unsigned forward advances below 2^31 add `advance - 1` gaps; duplicates, older values,
+and ambiguous half-range jumps do not move the forward baseline or repair old gaps.
+`resyncCount` counts the first ASM candidate after each failed candidate, even if that
+new candidate also fails. Startup/noise alone does not increment it.
 
-`encodeTelemetry(values)` produces the 12-byte big-endian demo payload.
-`encodeFrame({ sequence, payload, flags? })` accepts a Buffer of 0..246 meaningful
-bytes, derives its declared length, defaults flags to zero, pads unused bytes with
-zero, and appends CRC. It returns only the frame body, without ASM.
+Payloads 0–11 remain structurally valid without decoded telemetry. They still produce
+`frame.valid` with the same keys and null telemetry values; the UI displays “—”.
+This represents unavailable fields without interpreting padding. Default 12-byte
+payloads use the numeric telemetry schema shown in the PRD. Invalid frames emit no event.
 
-`validateFrame(body)` reports stored/calculated CRC and separate CRC/format validity.
-`decodeFrame(body)` also returns header fields and an owned copy of meaningful
-payload bytes. Both require exactly 256 bytes. An oversized declared payload length
-is flagged as invalid and returns no payload bytes. Decoded telemetry is present only
-when CRC and format are valid and at least 12 meaningful bytes exist. Short payloads
-remain structurally valid; padding is never decoded as telemetry. The standalone
-`decodeTelemetry(payload)` requires at least 12 bytes and reads the first 12.
+## Tests and audit evidence
 
-Encoder numeric inputs are range-checked; temperature is rounded with `Math.round`
-to signed int16 centi-degrees. Other wire fields require integers. Nonzero uint16
-flags are supported by the primitive; the MVP demo will use zero.
+```text
+npm test
+npm run typecheck
+npm run build
+```
 
-`new Synchronizer().push(chunk)` accepts arbitrary byte chunks and returns zero or
-more `{ frame, bitAlignment, asmBitOffset }` results. State persists across calls.
-It searches at every bit offset, waits in LOCK for 2080 bits, validates with the shared
-frame decoder in VERIFY, then emits and consumes a valid unit in EXTRACT. Failed CRC
-or format validation resumes HUNT exactly one bit after the failed ASM start.
-An immediately following buffered ASM takes EXTRACT directly to LOCK.
+Final regression: **178 passed, 0 failed, 0 skipped**; strict typecheck and Vite build
+passed. See [the final PRD audit](docs/prd-audit.md) for all 36 sections,
+acceptance criteria, exact test names, and final demo evidence.
 
-`state` and `stats` expose snapshots of synchronization state, counters, alignment,
-and buffer usage. An optional synchronous transition observer passed to the constructor
-can inspect short-lived VERIFY/EXTRACT states and failure reasons; it should only
-observe transitions, without calling `push` recursively. No transition history is stored.
-`resyncCount` counts the first ASM found after each failed candidate, even if that next
-candidate also fails. Noise alone does not increment it. CRC failures take precedence
-over format failures when both validation flags are false.
+Tests use ephemeral localhost UDP/WebSocket ports and close their sockets. In
+particular, `test/integration.test.ts` proves 100 clean frames through seeded 1–96-byte
+real UDP datagrams. `test/synchronizer.test.ts` protects true ASM recovery at bit 35
+inside a failed candidate, 31-bit noise retention, and defensive buffer-cap recovery.
+`test/faultRecovery.test.ts` combines tiny UDP datagrams with insertion/deletion.
 
-BitBuffer interprets bits MSB-first over owned backing storage and a logical head.
-Nonaligned extraction joins adjacent bytes into an owned byte-aligned result; extraction
-length must be divisible by eight. Invalid bit ranges throw RangeError. Discards advance
-the head without copying; compaction removes consumed whole bytes while preserving the
-partial byte. HUNT retains at most 31 bits. Storage grows geometrically up to 64 KiB;
-the synchronizer processes large chunks in 4 KiB pieces. A defensive capacity fault
-discards retained candidate state, records `bufferResets`/a `buffer_limit` transition,
-and resumes hunting in the current piece while preserving the stream position.
+## Important technical notes and limits
 
-Telemetry frames must be reconstructed independently of UDP message boundaries.
-The simulator chooses fragmentation; UDP itself delivers datagrams. CRC detects
-errors rather than repairing them. UDP, CRC, FSMs, the ASM, and WebSockets are standard
-building blocks; the receiver-side combination is the project's technical focus.
+The ASM is the real CCSDS Attached Sync Marker; the educational body is **not** a
+complete CCSDS TM Transfer Frame. Fragmentation is application-generated; UDP delivers
+each datagram intact. Bit slips are simulated in the logical stream before UDP
+packetization; normal UDP sockets do not expose RF bit slips. CRC detects errors,
+does not repair them, and can theoretically miss some corruption/false candidates.
+
+No retransmission, FEC, reorder restoration, RF hardware, database, authentication,
+cloud service, frontend framework, or persistent history is required or implemented.
+Optional datagram drop/reorder/duplicate modes and charts are outside this MVP.
+Manual screenshots/inspection records stay ignored under `dist/`; the audit document
+is the submission evidence. Build/dependency/editor artifacts are ignored.

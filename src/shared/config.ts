@@ -1,6 +1,6 @@
 import {
   DEFAULT_CHUNK_MAX_BYTES, DEFAULT_CHUNK_MIN_BYTES, DEFAULT_FRAME_RATE,
-  DEFAULT_SIM_SEED, DEFAULT_UDP_HOST, DEFAULT_UDP_PORT,
+  DEFAULT_SIM_SEED, DEFAULT_UDP_HOST, DEFAULT_UDP_PORT, DEFAULT_WS_HOST, DEFAULT_WS_PORT,
 } from './constants.js';
 
 function numberFrom(env: NodeJS.ProcessEnv, name: string, fallback: number): number {
@@ -31,7 +31,7 @@ export function readTransmitterConfig(env: NodeJS.ProcessEnv = process.env) {
 
 export function readReceiverConfig(env: NodeJS.ProcessEnv = process.env) {
   const endpoint = readUdpConfig(env);
-  const wsPort = numberFrom(env, 'WS_PORT', 8080);
+  const wsPort = numberFrom(env, 'WS_PORT', DEFAULT_WS_PORT);
   if (!Number.isInteger(wsPort) || wsPort < 1 || wsPort > 65535) throw new RangeError('WS_PORT must be 1..65535');
-  return { ...endpoint, websocket: { host: '127.0.0.1', port: wsPort } };
+  return { ...endpoint, websocket: { host: DEFAULT_WS_HOST, port: wsPort } };
 }

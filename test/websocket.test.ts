@@ -114,13 +114,44 @@ test('status cadence is bounded while valid frames publish immediately', { timeo
   } finally { client.socket.terminate(); await bridge.close(); }
 });
 
-test('bridge suppresses CRC/format-invalid and short-payload telemetry without altering receiver acceptance', () => {
+test('bridge suppresses invalid frames but publishes short valid frames without invented telemetry', () => {
   const frame = new Synchronizer().push(buildTransmissionUnit(0))[0];
   assert.equal(validFrameMessage({ ...frame, frame: { ...frame.frame, crcValid: false } }), null);
   assert.equal(validFrameMessage({ ...frame, frame: { ...frame.frame, formatValid: false } }), null);
   const short = new Synchronizer().push(Buffer.concat([asm(), encodeFrame({ sequence: 2, payload: Buffer.alloc(3) })]))[0];
   assert.equal(short.frame.crcValid, true);
-  assert.equal(validFrameMessage(short), null);
+  const message = validFrameMessage(short);
+  assert.ok(message);
+  assert.equal(message.type, 'frame.valid');
+  assert.deepEqual(message.frame, { sequence: 2, payloadLength: 3, bitAlignment: 0,
+    temperatureC: null, batteryMv: null, altitudeM: null, uptimeSeconds: null });
+});
+
+test('real UDP -> WebSocket publishes every valid payload length 0..11 with exact keys', { timeout: 10000 }, async () => {
+  const receiver = await startReceiver({ port: 0, websocket: { port: 0 } });
+  const address = receiver.websocket!.server.address();
+  assert.ok(address && typeof address !== 'string');
+  let client: Awaited<ReturnType<typeof connect>> | undefined;
+  let sender: Awaited<ReturnType<typeof createUdpSender>> | undefined;
+  try {
+    client = await connect(address.port);
+    sender = await createUdpSender('127.0.0.1', receiver.socket.address().port);
+    const units = Array.from({ length: 12 }, (_, length) => Buffer.concat([
+      asm(), encodeFrame({ sequence: length, payload: Buffer.alloc(length, 0x55) }),
+    ]));
+    await sender.send(packetize(Buffer.concat(units), { minChunkBytes: 1, maxChunkBytes: 16 }));
+    const inbox = client.messages;
+    await waitFor(() => inbox.filter(message => message.type === 'frame.valid').length === 12);
+    const frames = inbox.filter(message => message.type === 'frame.valid');
+    frames.forEach((message, index) => {
+      assert.deepEqual(message.frame, { sequence: index, payloadLength: index, bitAlignment: 0,
+        temperatureC: null, batteryMv: null, altitudeM: null, uptimeSeconds: null });
+      assert.equal(new Date(message.timestamp).toISOString(), message.timestamp);
+    });
+    assert.equal(receiver.metrics.snapshot().validFrames, 12);
+    assert.equal(receiver.metrics.snapshot().sequenceGaps, 0);
+    assert.equal(receiver.metrics.snapshot().crcFailures, 0);
+  } finally { client?.socket.terminate(); await sender?.close(); await receiver.close(); }
 });
 
 for (const [mode, alignment] of [['clean', 0], ['bit-flip', 0], ['bit-insert', 1], ['bit-delete', 7]] as const) {

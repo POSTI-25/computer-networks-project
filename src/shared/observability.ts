@@ -28,10 +28,11 @@ export interface ValidFrameMessage {
   frame: {
     sequence: number;
     payloadLength: number;
-    temperatureC: number;
-    batteryMv: number;
-    altitudeM: number;
-    uptimeSeconds: number;
+    // Null only when a structurally valid payload lacks the 12 telemetry bytes.
+    temperatureC: number | null;
+    batteryMv: number | null;
+    altitudeM: number | null;
+    uptimeSeconds: number | null;
     bitAlignment: number;
   };
 }
