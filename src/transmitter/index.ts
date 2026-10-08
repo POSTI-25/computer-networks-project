@@ -6,6 +6,7 @@ import { DEFAULT_UDP_HOST, DEFAULT_UDP_PORT } from '../shared/constants.js';
 import { readTransmitterConfig } from '../shared/config.js';
 import { FrameBuilder } from './frameBuilder.js';
 import { Packetizer } from './packetizer.js';
+import { BitstreamSimulator, parseSimulatorArgs } from './bitstreamSimulator.js';
 
 export async function createUdpSender(host = DEFAULT_UDP_HOST, port = DEFAULT_UDP_PORT) {
   const socket = dgram.createSocket('udp4');
@@ -46,23 +47,26 @@ async function main(): Promise<void> {
   const config = readTransmitterConfig();
   const packetizer = new Packetizer(config);
   const builder = new FrameBuilder();
+  const simulator = new BitstreamSimulator(parseSimulatorArgs(process.argv.slice(2)));
   const sender = await createUdpSender(config.host, config.port);
   const abort = new AbortController();
   const stop = () => abort.abort();
   process.once('SIGINT', stop);
   process.once('SIGTERM', stop);
   console.log(`[TX] destination=${config.host}:${config.port} rate=${config.frameRate} seed=${config.seed}`);
+  console.log(`[SIM] mode=${simulator.mode} offset=${simulator.offsetBits} targetFrame=${simulator.targetFrame} bodyBit=${simulator.bodyBitOffset}`);
   try {
     while (!abort.signal.aborted) {
       const started = performance.now();
       const sequence = builder.nextSequence;
-      const chunks = packetizer.push(builder.next());
+      const chunks = packetizer.push(simulator.push(builder.next()));
       await sender.send(chunks);
       console.log(`[TX] generated seq=${sequence} chunks=${chunks.length}`);
       const delay = Math.max(0, 1000 / config.frameRate - (performance.now() - started));
       try { await setTimeout(delay, undefined, { signal: abort.signal }); }
       catch (error) { if (!abort.signal.aborted) throw error; }
     }
+    await sender.send(packetizer.push(simulator.flush()));
     await sender.send(packetizer.flush());
   } finally {
     process.removeListener('SIGINT', stop);

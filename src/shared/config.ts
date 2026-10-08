@@ -28,3 +28,10 @@ export function readTransmitterConfig(env: NodeJS.ProcessEnv = process.env) {
   // The Packetizer owns validation of its bounds and uint32 seed.
   return { ...endpoint, frameRate, minChunkBytes, maxChunkBytes, seed };
 }
+
+export function readReceiverConfig(env: NodeJS.ProcessEnv = process.env) {
+  const endpoint = readUdpConfig(env);
+  const wsPort = numberFrom(env, 'WS_PORT', 8080);
+  if (!Number.isInteger(wsPort) || wsPort < 1 || wsPort > 65535) throw new RangeError('WS_PORT must be 1..65535');
+  return { ...endpoint, websocket: { host: '127.0.0.1', port: wsPort } };
+}

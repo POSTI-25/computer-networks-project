@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Telemetry Ground Station</title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div><p class="eyebrow">Computer Networks · Local telemetry simulation</p><h1>Ground Station</h1></div>
+        <p id="connection" class="indicator disconnected" role="status">WebSocket: Disconnected</p>
+      </header>
+      <div class="top-grid">
+        <section class="panel synchronization" aria-labelledby="sync-heading">
+          <h2 id="sync-heading">Bit-Level Synchronization</h2>
+          <p id="state" class="fsm">—</p>
+          <p id="synced" class="sync-status">Waiting for receiver status</p>
+          <dl><div><dt>Current Bit Alignment</dt><dd id="currentBitAlignment">—</dd></div></dl>
+        </section>
+        <section class="panel" aria-labelledby="telemetry-heading">
+          <h2 id="telemetry-heading">Latest Valid Telemetry</h2>
+          <dl class="telemetry">
+            <div><dt>Sequence</dt><dd id="sequence">—</dd></div>
+            <div><dt>Temperature</dt><dd id="temperatureC">—</dd></div>
+            <div><dt>Battery Voltage</dt><dd id="batteryMv">—</dd></div>
+            <div><dt>Altitude</dt><dd id="altitudeM">—</dd></div>
+            <div><dt>Uptime</dt><dd id="uptimeSeconds">—</dd></div>
+            <div><dt>Latest Valid Alignment</dt><dd id="latestAlignment">—</dd></div>
+          </dl>
+        </section>
+      </div>
+      <section class="panel" aria-labelledby="metrics-heading">
+        <h2 id="metrics-heading">Receiver Metrics</h2>
+        <dl class="counter-grid">
+          <div><dt>Valid Frames</dt><dd id="validFrames">—</dd></div>
+          <div><dt>CRC Failures</dt><dd id="crcFailures">—</dd></div>
+          <div><dt>Frame Sequence Gaps</dt><dd id="sequenceGaps">—</dd></div>
+          <div><dt>Resynchronizations</dt><dd id="resyncCount">—</dd></div>
+          <div><dt>UDP Datagrams Received</dt><dd id="udpDatagramsReceived">—</dd></div>
+        </dl>
+      </section>
+      <section class="panel" aria-labelledby="rates-heading">
+        <h2 id="rates-heading">Rates &amp; Buffer</h2>
+        <dl class="rate-grid">
+          <div><dt>Frames / Second</dt><dd id="framesPerSecond">—</dd></div>
+          <div><dt>Bytes / Second</dt><dd id="bytesPerSecond">—</dd></div>
+          <div><dt>Buffered Bits</dt><dd id="bufferedBits">—</dd></div>
+        </dl>
+      </section>
+      <section class="panel" aria-labelledby="events-heading">
+        <h2 id="events-heading">Recent Events</h2>
+        <p class="hint">Latest 20 observations. Status is sampled; brief FSM transitions may occur between updates.</p>
+        <ol id="events" aria-label="Recent receiver events"></ol>
+      </section>
+      <footer>Custom educational frame · CRC detects errors; the receiver rejects and reacquires synchronization.</footer>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

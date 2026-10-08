@@ -2,15 +2,15 @@
 
 A software-only Computer Networks course project demonstrating application framing,
 bit-level synchronization, CRC rejection, and automatic recovery above UDP.
-The receiver is the technical focus; the eventual browser dashboard is an observer.
+The receiver is the technical focus; the browser dashboard is an observer.
 
 `prd.md` is the authoritative specification. `context.md` records development progress
 and the seven-round roadmap. The custom 256-byte frame is CCSDS-inspired, not a
 fully standards-compliant CCSDS TM Transfer Frame.
 
-Round 4 includes binary primitives, the persistent bit-level synchronization/recovery
-FSM, deterministic mock telemetry and packetization, and a clean localhost UDP link.
-Deliberate impairment modes, WebSocket, and UI remain future work.
+Round 6 includes the synchronization/recovery core, UDP link, deterministic bit
+impairments, receiver metrics, WebSocket bridge, and minimal ground-station dashboard.
+Final integration, PRD audit, demonstration hardening, and cleanup remain Round 7.
 
 Use Node.js **22.19.0** and npm **10.9.3**. Install the locked dependencies with:
 
@@ -24,27 +24,79 @@ There is one package, with `ws` as its only external runtime dependency.
 
 `src/shared/` holds protocol primitives and configuration; `src/transmitter/` holds
 frame generation, packetization, and UDP sending; `src/receiver/` holds UDP input,
-BitBuffer, and the FSM. Full metrics and the WebSocket bridge remain later work.
-`test/` holds automated tests; `ui/` is a placeholder.
+BitBuffer, FSM, metrics, and WebSocket bridge. `test/` holds automated tests;
+`ui/` is a single-page vanilla TypeScript/Vite dashboard.
 
 Run the implemented checks with:
 
 ```text
 npm test
 npm run typecheck
+npm run build
 ```
 
 The tests use Node's native test runner via `tsx`, including localhost UDP tests on
-ephemeral ports. Run the clean demo in two terminals, receiver first:
+ephemeral ports. Run the clean dashboard demo in three terminals, receiver first:
 
 ```text
 npm run receiver
-npm run transmitter
+npm run transmitter -- --mode clean
+npm run ui
 ```
 
-Stop the transmitter first with Ctrl+C, then the receiver. Valid frames appear in the
-receiver console. The transmitter deliberately packetizes one logical stream into
+Open **http://127.0.0.1:5173**. The receiver also listens on **ws://127.0.0.1:8080**.
+The page shows connection, FSM/sync/current alignment, latest valid telemetry/alignment,
+valid/CRC/gap/recovery/datagram counters, rates, buffered bits, and the latest 20 events.
+Stop the transmitter first with Ctrl+C, then the receiver and Vite. The transmitter deliberately packetizes one logical stream into
 arbitrary UDP datagrams; UDP delivers each datagram intact to the application.
+
+Choose one transmitter mode per demo stream (start a fresh receiver for each new demo):
+
+```text
+npm run transmitter -- --mode clean
+npm run transmitter -- --mode bit-offset --offset 3
+npm run transmitter -- --mode bit-flip
+npm run transmitter -- --mode bit-insert
+npm run transmitter -- --mode bit-delete
+```
+
+For flip/insert/delete demos, sequence 5 is rejected; sequence 6 and later telemetry
+continue. CRC Failures, Frame Sequence Gaps, and Resynchronizations each increase by 1.
+Insertion changes alignment 0 -> 1; deletion changes 0 -> 7. Allow browser reconnection
+after restarting the receiver between distinct demo streams. No controls send commands
+back to the transmitter; the browser is read-only.
+
+Status uses only `receiver.status` at most 4/sec; accepted telemetry uses `frame.valid`
+with UTC ISO timestamps. Rates are count deltas divided by actual sample elapsed time,
+so short samples can fluctuate around the configured 5 FPS. Current alignment is null
+in HUNT; Latest Valid Alignment retains the last decoded frame's alignment. Events are
+derived from sampled counter/state changes and frame messages; the console captures
+transient FSM states that can occur between status samples. Reconnect clears old values
+until new observations arrive; no server replay or persistent history is kept.
+
+Sequence gaps use valid extracted frames and uint32 wraparound. Duplicates, older
+sequences, and ambiguous half-range jumps do not move the latest forward baseline.
+Forward advances smaller than 2^31 add `advance - 1` missing frames. They measure
+missing valid frame observations, not missing UDP datagrams. Structurally valid payloads
+shorter than 12 bytes count toward valid frames/sequence tracking but produce no telemetry
+WebSocket event, because they cannot populate the required telemetry schema.
+
+Bit-offset prefixes alternating `101...` bits, default 3, configurable 1..7.
+Flip/insert/delete perform one fault at zero-based clean frame index 5, body bit 80
+(MSB of body byte 10), after CRC generation. Override with `--target-frame 1 --body-bit 80`;
+body bit range is 0..2031, excluding ASM and stored CRC. Frame index equals sequence
+for the default generator starting at zero, until uint32 wraparound. Insert adds a `1`
+before the selected bit; delete removes that bit; `bit-slip` aliases insertion.
+Fault locations are explicit; SIM_SEED controls packet boundaries, not fault targeting.
+
+The pipeline is FrameBuilder -> BitstreamSimulator -> Packetizer -> UDP. The simulator
+packs MSB-first and carries up to seven unfinished bits across generation calls.
+Only final shutdown zero-pads a partial byte, then flushes the packetizer. Insertion
+and deletion permanently change later ASM alignment by +1 or -1 modulo 8. They model
+loss of alignment in the logical telemetry stream before UDP packetization; ordinary
+UDP sockets do not expose RF bit slips. The receiver gets bytes only and automatically
+hunts again after CRC rejection, with no receiver restart or simulator metadata.
+FSM console lines show acquisitions, failure -> HUNT, and the new alignment.
 
 Environment configuration (PowerShell: `$env:FRAME_RATE = '10'`, then run the command):
 
@@ -52,10 +104,15 @@ Environment configuration (PowerShell: `$env:FRAME_RATE = '10'`, then run the co
 |---|---|
 | UDP_HOST | 127.0.0.1 |
 | UDP_PORT | 5000 |
+| WS_PORT | 8080 |
 | FRAME_RATE | 5 |
 | CHUNK_MIN_BYTES | 1 |
 | CHUNK_MAX_BYTES | 96 |
 | SIM_SEED | 42 |
+
+WS_PORT overrides the receiver's local bridge. If changed, update the obvious
+`WEBSOCKET_URL` constant in `ui/src/main.ts` to match. Vite stays on localhost:5173.
+`npm run build` writes the production UI to `dist/ui/`. No new dependencies are required.
 
 Packetization uses project-owned Mulberry32 with a uint32 seed. The streaming
 Packetizer retains its unfinished datagram and PRNG state across generated frames,

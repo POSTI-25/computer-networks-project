@@ -12,7 +12,9 @@
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test test/*.test.ts",
     "receiver": "tsx src/receiver/index.ts",
-    "transmitter": "tsx src/transmitter/index.ts"
+    "transmitter": "tsx src/transmitter/index.ts",
+    "ui": "vite --config ui/vite.config.ts",
+    "build": "vite build --config ui/vite.config.ts"
   },
   "dependencies": {
     "ws": "8.18.3"
