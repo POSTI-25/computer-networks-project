@@ -13,6 +13,8 @@ export interface SyncTransition {
   reason: TransitionReason;
   headBitOffset: number;
   bitAlignment: number | null;
+  markerWindow?: { bits: string; streamStart: number; markerIndex: number };
+  validation?: { sequence: number; storedCrc: number; calculatedCrc: number; crcValid: boolean; formatValid: boolean };
 }
 
 export interface SynchronizedFrame {
@@ -86,12 +88,19 @@ export class Synchronizer {
             if (this.buffer.match32(searchOffset, ASM_VALUE)) break;
             searchOffset++; // Exactly one bit, including non-byte-aligned candidates.
           }
+          let markerWindow: SyncTransition['markerWindow'];
+          if (searchOffset + ASM_SIZE_BITS <= this.buffer.availableBits() && this.onTransition) {
+            const start = Math.max(0, searchOffset - 8);
+            const length = Math.min(48, this.buffer.availableBits() - start);
+            markerWindow = { bits: Array.from({ length }, (_, i) => this.buffer.readBit(start + i)).join(''),
+              streamStart: this.headBitOffset + start, markerIndex: searchOffset - start };
+          }
           this.discard(searchOffset);
           if (this.buffer.availableBits() < ASM_SIZE_BITS) {
             // All searchable positions were checked; retain only the final <=31 bits.
             return;
           }
-          this.acquire('asm_found');
+          this.acquire('asm_found', markerWindow);
           break;
         }
         case 'LOCK':
@@ -111,10 +120,10 @@ export class Synchronizer {
             // Candidate ASM is at the head. Discard ONE bit, never the whole failed unit:
             // a true marker can be inside the false candidate's remaining buffered region.
             this.discard(1);
-            this.transition('HUNT', reason);
+            this.transition('HUNT', reason, decoded);
           } else {
             this.verifiedFrame = decoded;
-            this.transition('EXTRACT', 'verified');
+            this.transition('EXTRACT', 'verified', decoded);
           }
           break;
         }
@@ -138,13 +147,17 @@ export class Synchronizer {
     }
   }
 
-  private acquire(reason: 'asm_found' | 'next_asm'): void {
+  private acquire(reason: 'asm_found' | 'next_asm', markerWindow?: SyncTransition['markerWindow']): void {
     this.candidateAlignment = this.headBitOffset % 8;
     this.counters.asmDetections++;
     // Count the first ASM candidate found after EACH failed candidate, even if it too fails.
     if (this.awaitingReacquisition) this.counters.resyncCount++;
     this.awaitingReacquisition = false;
-    this.transition('LOCK', reason);
+    if (!markerWindow && this.onTransition) {
+      const length = Math.min(48, this.buffer.availableBits());
+      markerWindow = { bits: Array.from({ length }, (_, i) => this.buffer.readBit(i)).join(''), streamStart: this.headBitOffset, markerIndex: 0 };
+    }
+    this.transition('LOCK', reason, undefined, markerWindow);
   }
 
   private discard(bits: number): void {
@@ -153,9 +166,13 @@ export class Synchronizer {
     this.headBitOffset += bits;
   }
 
-  private transition(to: SyncState, reason: TransitionReason): void {
+  private transition(to: SyncState, reason: TransitionReason, validation?: DecodedFrame, markerWindow?: SyncTransition['markerWindow']): void {
     const from = this.currentState;
     this.currentState = to;
-    this.onTransition?.({ from, to, reason, headBitOffset: this.headBitOffset, bitAlignment: this.candidateAlignment });
+    this.onTransition?.({ from, to, reason, headBitOffset: this.headBitOffset, bitAlignment: this.candidateAlignment,
+      ...(markerWindow ? { markerWindow } : {}),
+      ...(validation ? { validation: { sequence: validation.sequence, storedCrc: validation.storedCrc,
+        calculatedCrc: validation.calculatedCrc, crcValid: validation.crcValid, formatValid: validation.formatValid } } : {}),
+    });
   }
 }

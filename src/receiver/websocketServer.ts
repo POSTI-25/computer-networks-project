@@ -3,8 +3,10 @@ import { WebSocket, WebSocketServer } from 'ws';
 import type { ReceiverMetrics, ReceiverMessage, StatusMessage, ValidFrameMessage } from '../shared/observability.js';
 import type { SynchronizedFrame } from './synchronizer.js';
 import { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from '../shared/constants.js';
+import { buildLesson, LESSON_MODES } from './lessons.js';
 
 export const STATUS_INTERVAL_MS = 250;
+const lessonCache = new Map<string, string>();
 export { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from '../shared/constants.js';
 
 export function statusMessage(metrics: ReceiverMetrics): StatusMessage {
@@ -32,7 +34,7 @@ export interface WebSocketOptions {
 }
 
 export async function startWebSocketServer(options: WebSocketOptions) {
-  const server = new WebSocketServer({ host: options.host ?? DEFAULT_WS_HOST, port: options.port ?? DEFAULT_WS_PORT });
+  const server = new WebSocketServer({ host: options.host ?? DEFAULT_WS_HOST, port: options.port ?? DEFAULT_WS_PORT, maxPayload: 1024 });
   let timer: ReturnType<typeof setInterval> | undefined;
   let closePromise: Promise<void> | undefined;
   const close = (): Promise<void> => {
@@ -45,6 +47,18 @@ export async function startWebSocketServer(options: WebSocketOptions) {
   };
   server.on('connection', client => {
     client.on('error', () => client.terminate()); // One observer cannot stop UDP reception.
+    client.on('message', data => {
+      const requestText = data.toString();
+      if (requestText.length > 256) return;
+      try {
+        const request = JSON.parse(requestText);
+        if (request.type !== 'lesson.start' || !LESSON_MODES.includes(request.mode)) return;
+        if (client.bufferedAmount > 64 * 1024) { client.terminate(); return; }
+        let json = lessonCache.get(request.mode);
+        if (!json) { json = JSON.stringify(buildLesson(request.mode)); lessonCache.set(request.mode, json); }
+        client.send(json);
+      } catch { /* Ignore malformed observer requests. */ }
+    });
   });
   server.on('error', error => options.onError?.(error));
   try { await once(server, 'listening'); }
@@ -69,6 +83,7 @@ export async function startWebSocketServer(options: WebSocketOptions) {
 
   return {
     server, close,
+    publishTrace(message: import('../shared/observability.js').TraceMessage): void { broadcast(message); },
     publishFrame(frame: SynchronizedFrame): void {
       const message = validFrameMessage(frame);
       if (message) broadcast(message);

@@ -125,6 +125,8 @@ Screenshots/JSON intentionally ignored in dist/manual-round7 (prior round eviden
 - Repository originally had only PRD/no Git; a Git repository now exists. Preexisting uncommitted work preserved; no commit made. PRD, dependency lock and core synchronization source unchanged this round.
 
 ## Files Added / Changed
+Post-completion documentation, 2026-10-08: added `docs/academic-project-report.md` for academic submission (identity placeholders, architecture/protocol/algorithm, run instructions, recorded verification, limitations and primary references). Updated this context; no source/configuration/PRD changes and no new runtime tests executed for this documentation-only task. Round7 completion remains unchanged.
+
 Round7 only:
 - Added `docs/prd-audit.md`.
 - Updated `README.md`, `context.md`, `.gitignore`.

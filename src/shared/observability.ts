@@ -37,4 +37,19 @@ export interface ValidFrameMessage {
   };
 }
 
-export type ReceiverMessage = StatusMessage | ValidFrameMessage;
+export interface TraceMessage {
+  type: 'receiver.trace';
+  timestamp: string;
+  datagram: { index: number; bytes: number; hex: string; bits: string };
+  bufferedBefore: number;
+  bufferedAfter: number;
+  transitions: import('../receiver/synchronizer.js').SyncTransition[];
+}
+
+export interface LessonRecording {
+  type: 'lesson.recording';
+  mode: string;
+  steps: { trace: TraceMessage; metrics: ReceiverMetrics; frames: ValidFrameMessage[] }[];
+}
+
+export type ReceiverMessage = StatusMessage | ValidFrameMessage | TraceMessage | LessonRecording;

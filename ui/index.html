@@ -1,60 +1,20 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Telemetry Ground Station</title>
-  </head>
-  <body>
-    <main>
-      <header>
-        <div><p class="eyebrow">Computer Networks · Local telemetry simulation</p><h1>Ground Station</h1></div>
-        <p id="connection" class="indicator disconnected" role="status">WebSocket: Disconnected</p>
-      </header>
-      <div class="top-grid">
-        <section class="panel synchronization" aria-labelledby="sync-heading">
-          <h2 id="sync-heading">Bit-Level Synchronization</h2>
-          <p id="state" class="fsm">—</p>
-          <p id="synced" class="sync-status">Waiting for receiver status</p>
-          <dl><div><dt>Current Bit Alignment</dt><dd id="currentBitAlignment">—</dd></div></dl>
-        </section>
-        <section class="panel" aria-labelledby="telemetry-heading">
-          <h2 id="telemetry-heading">Latest Valid Telemetry</h2>
-          <dl class="telemetry">
-            <div><dt>Sequence</dt><dd id="sequence">—</dd></div>
-            <div><dt>Temperature</dt><dd id="temperatureC">—</dd></div>
-            <div><dt>Battery Voltage</dt><dd id="batteryMv">—</dd></div>
-            <div><dt>Altitude</dt><dd id="altitudeM">—</dd></div>
-            <div><dt>Uptime</dt><dd id="uptimeSeconds">—</dd></div>
-            <div><dt>Latest Valid Alignment</dt><dd id="latestAlignment">—</dd></div>
-          </dl>
-        </section>
-      </div>
-      <section class="panel" aria-labelledby="metrics-heading">
-        <h2 id="metrics-heading">Receiver Metrics</h2>
-        <dl class="counter-grid">
-          <div><dt>Valid Frames</dt><dd id="validFrames">—</dd></div>
-          <div><dt>CRC Failures</dt><dd id="crcFailures">—</dd></div>
-          <div><dt>Frame Sequence Gaps</dt><dd id="sequenceGaps">—</dd></div>
-          <div><dt>Resynchronizations</dt><dd id="resyncCount">—</dd></div>
-          <div><dt>UDP Datagrams Received</dt><dd id="udpDatagramsReceived">—</dd></div>
-        </dl>
-      </section>
-      <section class="panel" aria-labelledby="rates-heading">
-        <h2 id="rates-heading">Rates &amp; Buffer</h2>
-        <dl class="rate-grid">
-          <div><dt>Frames / Second</dt><dd id="framesPerSecond">—</dd></div>
-          <div><dt>Bytes / Second</dt><dd id="bytesPerSecond">—</dd></div>
-          <div><dt>Buffered Bits</dt><dd id="bufferedBits">—</dd></div>
-        </dl>
-      </section>
-      <section class="panel" aria-labelledby="events-heading">
-        <h2 id="events-heading">Recent Events</h2>
-        <p class="hint">Latest 20 observations. Status is sampled; brief FSM transitions may occur between updates.</p>
-        <ol id="events" aria-label="Recent receiver events"></ol>
-      </section>
-      <footer>Custom educational frame · CRC detects errors; the receiver rejects and reacquires synchronization.</footer>
-    </main>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
-</html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Ground Station · Telemetry Lab</title></head><body><main>
+<header><a class="brand" href="#"><span class="brand-icon">◈</span> GROUND STATION <span class="brand-sub">/ TELEMETRY LAB</span></a><div class="header-right"><span class="course">COMPUTER NETWORKS</span><span id="connection" class="indicator disconnected" role="status">Receiver offline</span><button id="present">Present ↗</button></div></header>
+<section class="intro"><div><p class="eyebrow">AN INTERACTIVE LOOK INSIDE THE RECEIVER</p><h1>Find the frame.<br><span>Recover the signal.</span></h1><p class="lede">A spacecraft sends a stream of bits. Messages arrive in pieces.<br>Watch the ground station find boundaries, detect damage, and recover.</p></div><div class="mission"><span class="orbit"></span><span class="orbit orbit-two"></span><span class="planet"></span><span class="satellite">◇</span><span class="mission-label">SOFTWARE SPACECRAFT → LOCAL GROUND STATION</span></div></section>
+<section class="toolbar" aria-label="Observation mode"><div class="segmented"><button id="live-tab" class="selected" aria-pressed="true">● Live receiver</button><button id="lesson-tab" aria-pressed="false">▷ Guided lab</button></div><p id="mode-note">Actual UDP traffic · receiver → WebSocket → browser</p></section>
+<section id="lesson-controls" class="lesson-controls" hidden><div><label for="scenario">EXPERIMENT</label><select id="scenario"><option value="clean">01 · Clean transmission</option><option value="bit-offset">02 · Start between bytes</option><option value="bit-flip">03 · Flip one bit</option><option value="bit-insert">04 · Insert one bit</option><option value="bit-delete">05 · Delete one bit</option></select></div><button id="restart">↺ Restart</button><button id="play">▶ Play</button><button id="step">Step →</button><button id="next-event">Next state →</button><label class="speed">Speed<select id="speed"><option value="900">Slow</option><option value="300" selected>Normal</option><option value="80">Fast</option></select></label><span id="lesson-progress">Waiting for recording</span></section>
+<section class="pipeline panel"><div class="section-title"><div><p class="eyebrow">01 / THE JOURNEY</p><h2>From sensor to screen</h2></div><span class="tag">Select a stage to explore</span></div><div id="pipeline" class="pipeline-track"></div><div class="stage-detail"><span id="stage-index" class="stage-index">01</span><div><h3 id="stage-title">Mock spacecraft</h3><p id="stage-description"></p></div><code id="stage-code">frameBuilder.ts</code></div></section>
+<section class="workspace-grid">
+<section class="panel"><div class="section-title"><div><p class="eyebrow">02 / TRANSPORT & BUFFERING</p><h2>Pieces in. Continuous stream out.</h2></div><span id="packet-badge" class="tag">Awaiting datagrams</span></div><p class="caption">Our packetizer chooses message boundaries. The receiver keeps unfinished frames across arrivals.</p><div id="packet-lane" class="packet-lane" aria-label="Recent datagram sizes"><span class="empty">Start the transmitter or open the guided lab.</span></div><div class="buffer-heading"><span>Persistent bit buffer</span><strong><span id="bufferedBits">—</span> <small>/ 2,080 candidate bits</small></strong></div><div class="buffer-track"><div id="buffer-fill"></div><span class="threshold">one complete transmission unit</span></div><p id="buffer-explanation" class="caption">Waiting for input. The buffer survives UDP message boundaries.</p><div class="raw-header"><span>ACTUAL CHUNK PREVIEW · FIRST 8 BYTES</span><span id="raw-size">—</span></div><div id="raw-bits" class="raw-bits">No data received</div><p id="raw-hex" class="hex">HEX —</p></section>
+<section class="panel"><div class="section-title"><div><p class="eyebrow">03 / RECEIVER STATE MACHINE</p><h2>Find. Wait. Verify. Extract.</h2></div><span id="synced" class="tag">Waiting</span></div><div id="fsm" class="fsm-track"></div><div class="state-story"><span id="state" class="state-label">WAITING</span><p id="state-explanation">Select Guided lab to step through every transition.</p></div><div class="alignment-heading"><span>ASM start within a byte</span><strong id="currentBitAlignment">—</strong></div><div id="alignment" class="alignment"></div><p class="caption">Positions 0–7. Highlight = observed marker alignment, not the received byte's contents.</p><div class="recovery-path">CRC / format failure <span>→ discard one bit → HUNT → next ASM</span></div><p id="transition-position" class="hex">Marker: 0x1ACFFC1D · 32 bits · searched MSB first</p></section>
+</section>
+<section class="panel"><div class="section-title"><div><p class="eyebrow">04 / APPLICATION FRAMING</p><h2>What is inside one transmission unit?</h2></div><span class="tag">260 bytes / 2,080 bits</span></div><div id="frame-layout" class="frame-layout"></div><div class="frame-detail"><strong id="field-title">Attached Sync Marker · 4 bytes</strong><p id="field-description">A known pattern marks the start. It may straddle datagrams or begin between byte boundaries.</p></div><p class="caption">Blocks are not to scale. CRC covers body bytes 0–253. The marker is outside the 256-byte body.</p></section>
+<section class="panel marker-panel"><div class="section-title"><div><p class="eyebrow">UNDER THE MICROSCOPE / BIT-LEVEL SEARCH</p><h2>A frame can start between bytes.</h2></div><span id="marker-result" class="tag">Awaiting a marker</span></div><p class="caption">Actual bits captured around the latest acquired marker. Vertical dividers show original byte boundaries. The highlighted 32-bit window can cross them.</p><div id="marker-window" class="marker-window"><span class="empty">The next marker acquisition will appear here.</span></div><div class="scanner-control"><label for="scan-position">Slide the receiver's search window</label><input id="scan-position" type="range" min="0" max="0" value="0" disabled><code id="scan-value">0x1ACFFC1D is the target</code></div><p id="marker-detail" class="caption">Try the bit-offset, insertion, or deletion experiment in Guided lab. Pause, then move the window to see why byte-only search is insufficient.</p></section>
+<section class="workspace-grid"><section class="panel"><div class="section-title"><div><p class="eyebrow">05 / ERROR DETECTION</p><h2>Trust the check, not the boundary.</h2></div><span id="crc-verdict" class="tag">No candidate checked</span></div><div class="crc-comparison"><div><span>CRC carried in frame</span><strong id="stored-crc">—</strong></div><span id="crc-symbol">?</span><div><span>CRC calculated here</span><strong id="calculated-crc">—</strong></div></div><p id="crc-story" class="caption">The receiver calculates CRC-16 over the received body, then compares it with the stored value.</p><div class="strip-title"><span>Recent validated candidates</span><span>✓ accepted · × rejected</span></div><div id="frame-history" class="frame-history"><span class="empty">Waiting for validation</span></div><div id="recovery-callout" class="callout">CRC detects damage. Recovery finds the next frame; it does not repair the damaged frame.</div></section>
+<section class="panel"><div class="section-title"><div><p class="eyebrow">06 / DECODED TELEMETRY</p><h2>Only accepted frames reach here.</h2></div><span class="tag">Mock sensor readings</span></div><dl class="telemetry"><div><dt>Frame sequence</dt><dd id="sequence">—</dd></div><div><dt>Temperature</dt><dd id="temperatureC">—</dd></div><div><dt>Battery voltage</dt><dd id="batteryMv">—</dd></div><div><dt>Altitude</dt><dd id="altitudeM">—</dd></div><div><dt>Simulated uptime</dt><dd id="uptimeSeconds">—</dd></div><div><dt>Latest valid alignment</dt><dd id="latestAlignment">—</dd></div></dl><p class="caption telemetry-note">Generated values, not real spacecraft measurements. Simulated uptime equals the generated sequence number.</p></section></section>
+<dl class="metrics-grid" aria-label="Receiver metrics"><div><dt>Accepted frames</dt><dd id="validFrames">—</dd></div><div><dt>CRC failures</dt><dd id="crcFailures">—</dd></div><div><dt>Sequence gaps</dt><dd id="sequenceGaps">—</dd></div><div><dt>Reacquisitions</dt><dd id="resyncCount">—</dd></div><div><dt>Datagrams / chunks</dt><dd id="udpDatagramsReceived">—</dd></div><div><dt>Frames / second</dt><dd id="framesPerSecond">—</dd><small id="bytesPerSecond">—</small></div></dl>
+<section class="panel"><div class="section-title"><div><p class="eyebrow">THE EVIDENCE</p><h2>Receiver activity</h2></div><button id="freeze">Freeze live visuals</button></div><p id="trace-note" class="caption">Live transitions come from the receiver engine. Fast steps may pass between status updates; the trace preserves recent transitions.</p><ol id="events" aria-label="Recent receiver events"></ol></section>
+<section class="demo-guide panel"><div><p class="eyebrow">PRESENT IT IN THREE MINUTES</p><h2>One story.<br>Three experiments.</h2></div><div><strong>01 / Clean</strong><p>Frames span messages. The persistent buffer reconstructs them. CRC matches.</p></div><div><strong>02 / Bit flip</strong><p>Frame 2 fails CRC. It is rejected, sequence 3 continues, and a gap is recorded.</p></div><div><strong>03 / Bit insertion</strong><p>Later markers move to alignment 1. Bit-level search recovers without a restart.</p></div></section>
+<footer><span>CCSDS-inspired marker · Custom educational frame · UDP transport</span><span>CRC detects. HUNT reacquires. WebSocket observes.</span></footer>
+</main><script type="module" src="/src/main.ts"></script></body></html>

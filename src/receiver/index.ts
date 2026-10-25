@@ -6,6 +6,7 @@ import { readReceiverConfig } from '../shared/config.js';
 import { Synchronizer, type SynchronizedFrame, type SyncTransition } from './synchronizer.js';
 import { Metrics } from './metrics.js';
 import { startWebSocketServer } from './websocketServer.js';
+import { traceMessage } from './trace.js';
 
 export interface ReceiverOptions {
   host?: string;
@@ -19,7 +20,11 @@ export interface ReceiverOptions {
 
 export async function startReceiver(options: ReceiverOptions = {}) {
   const socket = dgram.createSocket('udp4');
-  const synchronizer = new Synchronizer(options.onTransition);
+  const transitions: SyncTransition[] = [];
+  const synchronizer = new Synchronizer(event => {
+    if (options.websocket && transitions.length < 64) transitions.push(event);
+    options.onTransition?.(event);
+  });
   let udpDatagramsReceived = 0;
   let udpBytesReceived = 0;
   const metrics = new Metrics(() => synchronizer.stats, () => ({ udpDatagramsReceived, udpBytesReceived }));
@@ -40,6 +45,8 @@ export async function startReceiver(options: ReceiverOptions = {}) {
     void close();
   });
   socket.on('message', msg => {
+    transitions.length = 0;
+    const before = synchronizer.stats.bufferedBits;
     udpDatagramsReceived++;
     udpBytesReceived += msg.length;
     // No framing here: one persistent synchronizer receives every payload unchanged.
@@ -48,6 +55,7 @@ export async function startReceiver(options: ReceiverOptions = {}) {
       websocket?.publishFrame(frame);
       options.onFrame?.(frame);
     }
+    websocket?.publishTrace(traceMessage(msg, udpDatagramsReceived, before, synchronizer.stats.bufferedBits, transitions));
   });
   const ready = once(socket, 'listening');
   try {

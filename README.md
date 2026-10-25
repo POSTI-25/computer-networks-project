@@ -3,7 +3,7 @@
 A software-only Computer Networks project: mock spacecraft telemetry is framed,
 impaired, and deliberately fragmented across UDP datagrams. A persistent ground
 receiver searches every bit for the ASM, verifies CRC, rejects damaged frames, and
-automatically reacquires synchronization. A small browser dashboard observes it.
+automatically reacquires synchronization. An interactive teaching dashboard visualizes it.
 `prd.md` is authoritative; `context.md` records implementation and final evidence.
 
 ## Technical focus and architecture
@@ -68,8 +68,24 @@ npm run ui
 
 Open **http://127.0.0.1:5173**. UDP defaults to **127.0.0.1:5000** and WebSocket to
 **ws://127.0.0.1:8080**. Stop the transmitter first with Ctrl+C, then receiver and Vite.
-The page shows connection, FSM/sync/alignment, valid telemetry, counters, rates,
-buffered bits, and the latest 20 local events. It sends no control commands.
+The page shows the transmission pipeline, actual datagram bits, persistent buffer,
+FSM transitions, frame fields, captured ASM search windows, CRC comparisons, decoded
+telemetry, counters, and the latest 20 local events. Live mode is an observer.
+
+For a classroom presentation, select **Guided lab**. Choose clean, bit-offset,
+bit-flip, bit-insert, or bit-delete, then use Play/Pause, Step, or Next state.
+The receiver creates a deterministic six-frame recording using the same production
+frame builder, simulator, packetizer, synchronizer, and CRC implementation. Chunks
+are processed in memory; no live UDP state is modified. Faults target sequence 2.
+Each FSM transition can be shown separately. Metrics update at chunk completion;
+replay timing is illustrative and not a measured network rate. Guided lab needs
+only the receiver and UI, not a running transmitter.
+
+Drag the ASM search-window slider to compare adjacent 32-bit candidates over actual
+captured stream bits. Byte dividers demonstrate how alignment 1, 3, or 7 crosses byte
+boundaries. Click pipeline stages and frame fields for explanations. **Present**
+uses a compact layout and requests fullscreen; **Freeze live visuals** holds a
+snapshot while reception continues. See [the presentation guide](docs/demo-guide.md).
 
 For each distinct demo stream, restart the receiver and run one transmitter command.
 The browser reconnects automatically. Recovery within each demo requires no restart.
@@ -110,8 +126,16 @@ PowerShell example: `$env:CHUNK_MAX_BYTES = '16'` before starting the transmitte
 Changing WS_PORT also requires updating the obvious `WEBSOCKET_URL` constant in
 `ui/src/main.ts`. Vite stays on localhost:5173; `npm run build` writes `dist/ui/`.
 
-Only `receiver.status` (at most 4/sec) and `frame.valid` (every valid extracted frame)
-are published, with ISO UTC timestamps. Rates use count deltas / actual elapsed
+`receiver.status` (at most 4/sec) and `frame.valid` (every valid extracted frame)
+retain their original JSON schemas and ISO UTC timestamps. `receiver.trace` adds a
+bounded observation per datagram: its size, first 24 bytes in hex, first 8 bytes in
+bits, before/after buffer counts, and at most 64 transitions. Marker acquisition
+includes up to 48 actual buffered bits; validation includes stored/calculated CRC.
+The browser can request `lesson.start` with one of the five supported modes; only
+that client receives a cached `lesson.recording`. This does not control the live
+transmitter or receiver. Incoming observer messages are limited to 1 KiB, outgoing
+backlog is bounded, and recordings contain only six generated frames.
+Rates use count deltas / actual elapsed
 time, so short samples fluctuate around 5 FPS. Synced is false only in HUNT; current
 alignment is null when no candidate is known. Latest Valid Alignment remains visible.
 Counters/events show recovery even when status sampling misses brief FSM transitions.
@@ -135,8 +159,8 @@ npm run typecheck
 npm run build
 ```
 
-Final regression: **178 passed, 0 failed, 0 skipped**; strict typecheck and Vite build
-passed. See [the final PRD audit](docs/prd-audit.md) for all 36 sections,
+Teaching-view regression: **185 passed, 0 failed, 0 skipped**; strict typecheck and
+Vite build passed. The original 178 tests still pass. See [the original PRD audit](docs/prd-audit.md) for all 36 sections,
 acceptance criteria, exact test names, and final demo evidence.
 
 Tests use ephemeral localhost UDP/WebSocket ports and close their sockets. In
