@@ -1,0 +1,1125 @@
+
+> telemetry-ground-station@0.1.0 test
+> node --import tsx --test test/*.test.ts
+
+TAP version 13
+# Subtest: BITBUF-1: reads 0x80 and 0x01 MSB-first
+ok 1 - BITBUF-1: reads 0x80 and 0x01 MSB-first
+  ---
+  duration_ms: 2.2935
+  type: 'test'
+  ...
+# Subtest: BITBUF-2: a three-bit discard advances the logical head exactly
+ok 2 - BITBUF-2: a three-bit discard advances the logical head exactly
+  ---
+  duration_ms: 0.3669
+  type: 'test'
+  ...
+# Subtest: BITBUF-3: append preserves residual bits after a nonaligned discard
+ok 3 - BITBUF-3: append preserves residual bits after a nonaligned discard
+  ---
+  duration_ms: 0.233
+  type: 'test'
+  ...
+# Subtest: BITBUF-4: matches byte-aligned ASM and rejects a different value
+ok 4 - BITBUF-4: matches byte-aligned ASM and rejects a different value
+  ---
+  duration_ms: 6.3173
+  type: 'test'
+  ...
+# Subtest: BITBUF-5: ASM matching at alignment 0, larger offset, and shifted head
+ok 5 - BITBUF-5: ASM matching at alignment 0, larger offset, and shifted head
+  ---
+  duration_ms: 0.6628
+  type: 'test'
+  ...
+# Subtest: BITBUF-6: extracts exactly 256 bytes at alignment 0
+ok 6 - BITBUF-6: extracts exactly 256 bytes at alignment 0
+  ---
+  duration_ms: 3.9122
+  type: 'test'
+  ...
+# Subtest: BITBUF-5: ASM matching at alignment 1, larger offset, and shifted head
+ok 7 - BITBUF-5: ASM matching at alignment 1, larger offset, and shifted head
+  ---
+  duration_ms: 0.3789
+  type: 'test'
+  ...
+# Subtest: BITBUF-6: extracts exactly 256 bytes at alignment 1
+ok 8 - BITBUF-6: extracts exactly 256 bytes at alignment 1
+  ---
+  duration_ms: 3
+  type: 'test'
+  ...
+# Subtest: BITBUF-5: ASM matching at alignment 2, larger offset, and shifted head
+ok 9 - BITBUF-5: ASM matching at alignment 2, larger offset, and shifted head
+  ---
+  duration_ms: 1.3629
+  type: 'test'
+  ...
+# Subtest: BITBUF-6: extracts exactly 256 bytes at alignment 2
+ok 10 - BITBUF-6: extracts exactly 256 bytes at alignment 2
+  ---
+  duration_ms: 12.5561
+  type: 'test'
+  ...
+# Subtest: BITBUF-5: ASM matching at alignment 3, larger offset, and shifted head
+ok 11 - BITBUF-5: ASM matching at alignment 3, larger offset, and shifted head
+  ---
+  duration_ms: 1.0595
+  type: 'test'
+  ...
+# Subtest: BITBUF-6: extracts exactly 256 bytes at alignment 3
+ok 12 - BITBUF-6: extracts exactly 256 bytes at alignment 3
+  ---
+  duration_ms: 1.5825
+  type: 'test'
+  ...
+# Subtest: BITBUF-5: ASM matching at alignment 4, larger offset, and shifted head
+ok 13 - BITBUF-5: ASM matching at alignment 4, larger offset, and shifted head
+  ---
+  duration_ms: 0.2774
+  type: 'test'
+  ...
+# Subtest: BITBUF-6: extracts exactly 256 bytes at alignment 4
+ok 14 - BITBUF-6: extracts exactly 256 bytes at alignment 4
+  ---
+  duration_ms: 1.4213
+  type: 'test'
+  ...
+# Subtest: BITBUF-5: ASM matching at alignment 5, larger offset, and shifted head
+ok 15 - BITBUF-5: ASM matching at alignment 5, larger offset, and shifted head
+  ---
+  duration_ms: 0.368
+  type: 'test'
+  ...
+# Subtest: BITBUF-6: extracts exactly 256 bytes at alignment 5
+ok 16 - BITBUF-6: extracts exactly 256 bytes at alignment 5
+  ---
+  duration_ms: 12.9756
+  type: 'test'
+  ...
+# Subtest: BITBUF-5: ASM matching at alignment 6, larger offset, and shifted head
+ok 17 - BITBUF-5: ASM matching at alignment 6, larger offset, and shifted head
+  ---
+  duration_ms: 0.1712
+  type: 'test'
+  ...
+# Subtest: BITBUF-6: extracts exactly 256 bytes at alignment 6
+ok 18 - BITBUF-6: extracts exactly 256 bytes at alignment 6
+  ---
+  duration_ms: 0.5403
+  type: 'test'
+  ...
+# Subtest: BITBUF-5: ASM matching at alignment 7, larger offset, and shifted head
+ok 19 - BITBUF-5: ASM matching at alignment 7, larger offset, and shifted head
+  ---
+  duration_ms: 0.149
+  type: 'test'
+  ...
+# Subtest: BITBUF-6: extracts exactly 256 bytes at alignment 7
+ok 20 - BITBUF-6: extracts exactly 256 bytes at alignment 7
+  ---
+  duration_ms: 0.2966
+  type: 'test'
+  ...
+# Subtest: BITBUF-7: nonaligned ASM spans successive appends
+ok 21 - BITBUF-7: nonaligned ASM spans successive appends
+  ---
+  duration_ms: 0.9822
+  type: 'test'
+  ...
+# Subtest: BITBUF-8: compaction preserves a partial byte, extraction, and subsequent append
+ok 22 - BITBUF-8: compaction preserves a partial byte, extraction, and subsequent append
+  ---
+  duration_ms: 5.7987
+  type: 'test'
+  ...
+# Subtest: invalid reads, matches, extractions, and discards fail clearly
+ok 23 - invalid reads, matches, extractions, and discards fail clearly
+  ---
+  duration_ms: 1.1794
+  type: 'test'
+  ...
+# Subtest: uint32 matching handles the sign bit without signed comparison errors
+ok 24 - uint32 matching handles the sign bit without signed comparison errors
+  ---
+  duration_ms: 0.2676
+  type: 'test'
+  ...
+# Subtest: empty operations and a fully consumed buffer can be reused
+ok 25 - empty operations and a fully consumed buffer can be reused
+  ---
+  duration_ms: 0.2825
+  type: 'test'
+  ...
+# Subtest: appended and extracted bytes are owned copies
+ok 26 - appended and extracted bytes are owned copies
+  ---
+  duration_ms: 0.2018
+  type: 'test'
+  ...
+# Subtest: 64 KiB cap rejects excess input without losing already buffered data
+ok 27 - 64 KiB cap rejects excess input without losing already buffered data
+  ---
+  duration_ms: 0.9141
+  type: 'test'
+  ...
+# Subtest: many tiny appends use bounded geometric storage and preserve every byte
+ok 28 - many tiny appends use bounded geometric storage and preserve every byte
+  ---
+  duration_ms: 8.2501
+  type: 'test'
+  ...
+# Subtest: SIM-1 clean identity preserves input and bit length
+ok 29 - SIM-1 clean identity preserves input and bit length
+  ---
+  duration_ms: 10.7487
+  type: 'test'
+  ...
+# Subtest: SIM-2 prefixes exactly 1 bits without modifying stream
+ok 30 - SIM-2 prefixes exactly 1 bits without modifying stream
+  ---
+  duration_ms: 5.5408
+  type: 'test'
+  ...
+# Subtest: SIM-2 prefixes exactly 2 bits without modifying stream
+ok 31 - SIM-2 prefixes exactly 2 bits without modifying stream
+  ---
+  duration_ms: 2.2698
+  type: 'test'
+  ...
+# Subtest: SIM-2 prefixes exactly 3 bits without modifying stream
+ok 32 - SIM-2 prefixes exactly 3 bits without modifying stream
+  ---
+  duration_ms: 0.7171
+  type: 'test'
+  ...
+# Subtest: SIM-2 prefixes exactly 4 bits without modifying stream
+ok 33 - SIM-2 prefixes exactly 4 bits without modifying stream
+  ---
+  duration_ms: 1.6292
+  type: 'test'
+  ...
+# Subtest: SIM-2 prefixes exactly 5 bits without modifying stream
+ok 34 - SIM-2 prefixes exactly 5 bits without modifying stream
+  ---
+  duration_ms: 0.6686
+  type: 'test'
+  ...
+# Subtest: SIM-2 prefixes exactly 6 bits without modifying stream
+ok 35 - SIM-2 prefixes exactly 6 bits without modifying stream
+  ---
+  duration_ms: 0.7592
+  type: 'test'
+  ...
+# Subtest: SIM-2 prefixes exactly 7 bits without modifying stream
+ok 36 - SIM-2 prefixes exactly 7 bits without modifying stream
+  ---
+  duration_ms: 0.6335
+  type: 'test'
+  ...
+# Subtest: SIM-3 flips exactly the chosen body bit, preserves ASM and stored CRC
+ok 37 - SIM-3 flips exactly the chosen body bit, preserves ASM and stored CRC
+  ---
+  duration_ms: 2.5546
+  type: 'test'
+  ...
+# Subtest: SIM-4 inserts exactly 0 before target and shifts every following bit
+ok 38 - SIM-4 inserts exactly 0 before target and shifts every following bit
+  ---
+  duration_ms: 1.4701
+  type: 'test'
+  ...
+# Subtest: SIM-4 inserts exactly 1 before target and shifts every following bit
+ok 39 - SIM-4 inserts exactly 1 before target and shifts every following bit
+  ---
+  duration_ms: 1.1671
+  type: 'test'
+  ...
+# Subtest: SIM-5 deletes exactly the original target bit and shifts all following bits
+ok 40 - SIM-5 deletes exactly the original target bit and shifts all following bits
+  ---
+  duration_ms: 1.1864
+  type: 'test'
+  ...
+# Subtest: SIM-6 clean is deterministic and independent of upstream byte chunks
+ok 41 - SIM-6 clean is deterministic and independent of upstream byte chunks
+  ---
+  duration_ms: 8.756
+  type: 'test'
+  ...
+# Subtest: SIM-6 bit-offset is deterministic and independent of upstream byte chunks
+ok 42 - SIM-6 bit-offset is deterministic and independent of upstream byte chunks
+  ---
+  duration_ms: 18.4037
+  type: 'test'
+  ...
+# Subtest: SIM-6 bit-flip is deterministic and independent of upstream byte chunks
+ok 43 - SIM-6 bit-flip is deterministic and independent of upstream byte chunks
+  ---
+  duration_ms: 4.6061
+  type: 'test'
+  ...
+# Subtest: SIM-6 bit-insert is deterministic and independent of upstream byte chunks
+ok 44 - SIM-6 bit-insert is deterministic and independent of upstream byte chunks
+  ---
+  duration_ms: 4.4208
+  type: 'test'
+  ...
+# Subtest: SIM-6 bit-delete is deterministic and independent of upstream byte chunks
+ok 45 - SIM-6 bit-delete is deterministic and independent of upstream byte chunks
+  ---
+  duration_ms: 3.3733
+  type: 'test'
+  ...
+# Subtest: SIM-6 bit-slip is deterministic and independent of upstream byte chunks
+ok 46 - SIM-6 bit-slip is deterministic and independent of upstream byte chunks
+  ---
+  duration_ms: 3.7824
+  type: 'test'
+  ...
+# Subtest: carry persists across frame calls; empty pushes do not start prefix; flush is terminal and idempotent
+ok 47 - carry persists across frame calls; empty pushes do not start prefix; flush is terminal and idempotent
+  ---
+  duration_ms: 1.7242
+  type: 'test'
+  ...
+# Subtest: default fault targets frame index 5 body bit 80, bit-slip aliases insertion
+ok 48 - default fault targets frame index 5 body bit 80, bit-slip aliases insertion
+  ---
+  duration_ms: 1.0698
+  type: 'test'
+  ...
+# Subtest: CLI parses minimal deterministic flags and rejects invalid configuration before networking
+ok 49 - CLI parses minimal deterministic flags and rejects invalid configuration before networking
+  ---
+  duration_ms: 1.04
+  type: 'test'
+  ...
+# Subtest: environment configuration defaults match the PRD
+ok 50 - environment configuration defaults match the PRD
+  ---
+  duration_ms: 6.8145
+  type: 'test'
+  ...
+# Subtest: all requested transmitter environment values can be overridden
+ok 51 - all requested transmitter environment values can be overridden
+  ---
+  duration_ms: 0.3945
+  type: 'test'
+  ...
+# Subtest: invalid endpoint and frame-rate environment values fail clearly
+ok 52 - invalid endpoint and frame-rate environment values fail clearly
+  ---
+  duration_ms: 1.0358
+  type: 'test'
+  ...
+# Subtest: receiver configuration ignores transmitter-only environment fields
+ok 53 - receiver configuration ignores transmitter-only environment fields
+  ---
+  duration_ms: 0.2059
+  type: 'test'
+  ...
+# Subtest: CRC-1: ASCII 123456789 produces the fixed check value 0x29B1
+ok 54 - CRC-1: ASCII 123456789 produces the fixed check value 0x29B1
+  ---
+  duration_ms: 2.2133
+  type: 'test'
+  ...
+# Subtest: CRC-2: repeated calls are deterministic and leave input unchanged
+ok 55 - CRC-2: repeated calls are deterministic and leave input unchanged
+  ---
+  duration_ms: 1.4157
+  type: 'test'
+  ...
+# Subtest: CRC-3: a selected single-bit mutation changes the checksum
+ok 56 - CRC-3: a selected single-bit mutation changes the checksum
+  ---
+  duration_ms: 0.4531
+  type: 'test'
+  ...
+# Subtest: empty CRC input preserves the all-ones initial value
+ok 57 - empty CRC input preserves the all-ones initial value
+  ---
+  duration_ms: 0.1753
+  type: 'test'
+  ...
+# Subtest: direct: offset 1 acquires nonaligned ASM through 1..16-byte fragments
+ok 58 - direct: offset 1 acquires nonaligned ASM through 1..16-byte fragments
+  ---
+  duration_ms: 30.8179
+  type: 'test'
+  ...
+# Subtest: real UDP: offset 1 acquires nonaligned ASM through 1..16-byte fragments
+ok 59 - real UDP: offset 1 acquires nonaligned ASM through 1..16-byte fragments
+  ---
+  duration_ms: 427.0548
+  type: 'test'
+  ...
+# Subtest: direct: offset 2 acquires nonaligned ASM through 1..16-byte fragments
+ok 60 - direct: offset 2 acquires nonaligned ASM through 1..16-byte fragments
+  ---
+  duration_ms: 13.1603
+  type: 'test'
+  ...
+# Subtest: real UDP: offset 2 acquires nonaligned ASM through 1..16-byte fragments
+ok 61 - real UDP: offset 2 acquires nonaligned ASM through 1..16-byte fragments
+  ---
+  duration_ms: 181.2823
+  type: 'test'
+  ...
+# Subtest: direct: offset 3 acquires nonaligned ASM through 1..16-byte fragments
+ok 62 - direct: offset 3 acquires nonaligned ASM through 1..16-byte fragments
+  ---
+  duration_ms: 10.1833
+  type: 'test'
+  ...
+# Subtest: real UDP: offset 3 acquires nonaligned ASM through 1..16-byte fragments
+ok 63 - real UDP: offset 3 acquires nonaligned ASM through 1..16-byte fragments
+  ---
+  duration_ms: 170.9126
+  type: 'test'
+  ...
+# Subtest: direct: offset 4 acquires nonaligned ASM through 1..16-byte fragments
+ok 64 - direct: offset 4 acquires nonaligned ASM through 1..16-byte fragments
+  ---
+  duration_ms: 6.706
+  type: 'test'
+  ...
+# Subtest: real UDP: offset 4 acquires nonaligned ASM through 1..16-byte fragments
+ok 65 - real UDP: offset 4 acquires nonaligned ASM through 1..16-byte fragments
+  ---
+  duration_ms: 105.012
+  type: 'test'
+  ...
+# Subtest: direct: offset 5 acquires nonaligned ASM through 1..16-byte fragments
+ok 66 - direct: offset 5 acquires nonaligned ASM through 1..16-byte fragments
+  ---
+  duration_ms: 6.36
+  type: 'test'
+  ...
+# Subtest: real UDP: offset 5 acquires nonaligned ASM through 1..16-byte fragments
+ok 67 - real UDP: offset 5 acquires nonaligned ASM through 1..16-byte fragments
+  ---
+  duration_ms: 111.281
+  type: 'test'
+  ...
+# Subtest: direct: offset 6 acquires nonaligned ASM through 1..16-byte fragments
+ok 68 - direct: offset 6 acquires nonaligned ASM through 1..16-byte fragments
+  ---
+  duration_ms: 5.4193
+  type: 'test'
+  ...
+# Subtest: real UDP: offset 6 acquires nonaligned ASM through 1..16-byte fragments
+ok 69 - real UDP: offset 6 acquires nonaligned ASM through 1..16-byte fragments
+  ---
+  duration_ms: 78.1232
+  type: 'test'
+  ...
+# Subtest: direct: offset 7 acquires nonaligned ASM through 1..16-byte fragments
+ok 70 - direct: offset 7 acquires nonaligned ASM through 1..16-byte fragments
+  ---
+  duration_ms: 2.4553
+  type: 'test'
+  ...
+# Subtest: real UDP: offset 7 acquires nonaligned ASM through 1..16-byte fragments
+ok 71 - real UDP: offset 7 acquires nonaligned ASM through 1..16-byte fragments
+  ---
+  duration_ms: 93.867
+  type: 'test'
+  ...
+# Subtest: direct: bit-flip rejects frame 1 and automatically recovers frames 2 and 3
+ok 72 - direct: bit-flip rejects frame 1 and automatically recovers frames 2 and 3
+  ---
+  duration_ms: 8.7234
+  type: 'test'
+  ...
+# Subtest: real UDP: bit-flip plus tiny fragmentation rejects CRC and reacquires later intact ASM
+ok 73 - real UDP: bit-flip plus tiny fragmentation rejects CRC and reacquires later intact ASM
+  ---
+  duration_ms: 75.669
+  type: 'test'
+  ...
+# Subtest: direct: bit-insert rejects frame 1 and automatically recovers frames 2 and 3
+ok 74 - direct: bit-insert rejects frame 1 and automatically recovers frames 2 and 3
+  ---
+  duration_ms: 8.3016
+  type: 'test'
+  ...
+# Subtest: real UDP: bit-insert plus tiny fragmentation rejects CRC and reacquires later intact ASM
+ok 75 - real UDP: bit-insert plus tiny fragmentation rejects CRC and reacquires later intact ASM
+  ---
+  duration_ms: 68.5933
+  type: 'test'
+  ...
+# Subtest: direct: bit-delete rejects frame 1 and automatically recovers frames 2 and 3
+ok 76 - direct: bit-delete rejects frame 1 and automatically recovers frames 2 and 3
+  ---
+  duration_ms: 2.3973
+  type: 'test'
+  ...
+# Subtest: real UDP: bit-delete plus tiny fragmentation rejects CRC and reacquires later intact ASM
+ok 77 - real UDP: bit-delete plus tiny fragmentation rejects CRC and reacquires later intact ASM
+  ---
+  duration_ms: 102.5781
+  type: 'test'
+  ...
+# Subtest: recovers after bit-slip and reacquires ASM at new bit alignment
+ok 78 - recovers after bit-slip and reacquires ASM at new bit alignment
+  ---
+  duration_ms: 5.515
+  type: 'test'
+  ...
+# Subtest: real UDP: false lock searches inside failed candidate instead of discarding whole unit
+ok 79 - real UDP: false lock searches inside failed candidate instead of discarding whole unit
+  ---
+  duration_ms: 35.6343
+  type: 'test'
+  ...
+# Subtest: long noise followed by slipped stream stays bounded and recovers without reset
+ok 80 - long noise followed by slipped stream stays bounded and recovers without reset
+  ---
+  duration_ms: 589.9715
+  type: 'test'
+  ...
+# Subtest: protocol constants match the fixed PRD layout
+ok 81 - protocol constants match the fixed PRD layout
+  ---
+  duration_ms: 2.4792
+  type: 'test'
+  ...
+# Subtest: FRAME-1: encoded body is exactly 256 bytes with no prepended ASM
+ok 82 - FRAME-1: encoded body is exactly 256 bytes with no prepended ASM
+  ---
+  duration_ms: 1.2219
+  type: 'test'
+  ...
+# Subtest: FRAME-2: header fields and CRC occupy the exact PRD offsets
+ok 83 - FRAME-2: header fields and CRC occupy the exact PRD offsets
+  ---
+  duration_ms: 1.9302
+  type: 'test'
+  ...
+# Subtest: FRAME-3: recognizable sequence is written in network byte order
+ok 84 - FRAME-3: recognizable sequence is written in network byte order
+  ---
+  duration_ms: 0.7175
+  type: 'test'
+  ...
+# Subtest: FRAME-4: meaningful telemetry occupies bytes 8..19 and padding is zero
+ok 85 - FRAME-4: meaningful telemetry occupies bytes 8..19 and padding is zero
+  ---
+  duration_ms: 0.5863
+  type: 'test'
+  ...
+# Subtest: FRAME-5: CRC is big-endian at bytes 254..255 and excludes its own field
+ok 86 - FRAME-5: CRC is big-endian at bytes 254..255 and excludes its own field
+  ---
+  duration_ms: 1.727
+  type: 'test'
+  ...
+# Subtest: FRAME-6: known frame round-trips all header and telemetry values
+ok 87 - FRAME-6: known frame round-trips all header and telemetry values
+  ---
+  duration_ms: 0.6788
+  type: 'test'
+  ...
+# Subtest: FRAME-7: clean frame has valid CRC and format
+ok 88 - FRAME-7: clean frame has valid CRC and format
+  ---
+  duration_ms: 0.4058
+  type: 'test'
+  ...
+# Subtest: FRAME-8: selected header, telemetry, and padding bit flips fail CRC
+ok 89 - FRAME-8: selected header, telemetry, and padding bit flips fail CRC
+  ---
+  duration_ms: 1.9703
+  type: 'test'
+  ...
+# Subtest: FRAME-9: encoder rejects over-capacity payloads; decoder flags bad lengths even with valid CRC
+ok 90 - FRAME-9: encoder rejects over-capacity payloads; decoder flags bad lengths even with valid CRC
+  ---
+  duration_ms: 1.6528
+  type: 'test'
+  ...
+# Subtest: FRAME-10: sequences 0, 1, and uint32 maximum round-trip
+ok 91 - FRAME-10: sequences 0, 1, and uint32 maximum round-trip
+  ---
+  duration_ms: 0.556
+  type: 'test'
+  ...
+# Subtest: FRAME-11: negative temperature uses signed int16 centi-degrees
+ok 92 - FRAME-11: negative temperature uses signed int16 centi-degrees
+  ---
+  duration_ms: 0.4775
+  type: 'test'
+  ...
+# Subtest: telemetry helper uses exact big-endian bytes and ignores extension bytes
+ok 93 - telemetry helper uses exact big-endian bytes and ignores extension bytes
+  ---
+  duration_ms: 0.299
+  type: 'test'
+  ...
+# Subtest: temperature rounds to centi-degree precision
+ok 94 - temperature rounds to centi-degree precision
+  ---
+  duration_ms: 0.1766
+  type: 'test'
+  ...
+# Subtest: telemetry wire-type minimum and maximum values round-trip
+ok 95 - telemetry wire-type minimum and maximum values round-trip
+  ---
+  duration_ms: 0.3068
+  type: 'test'
+  ...
+# Subtest: invalid sequence and flags reject instead of truncating or wrapping
+ok 96 - invalid sequence and flags reject instead of truncating or wrapping
+  ---
+  duration_ms: 0.4659
+  type: 'test'
+  ...
+# Subtest: invalid telemetry values reject before writing wire fields
+ok 97 - invalid telemetry values reject before writing wire fields
+  ---
+  duration_ms: 0.9784
+  type: 'test'
+  ...
+# Subtest: decoder and validator reject any body size other than 256
+ok 98 - decoder and validator reject any body size other than 256
+  ---
+  duration_ms: 0.4753
+  type: 'test'
+  ...
+# Subtest: payload lengths 0..11 are valid without telemetry; direct telemetry decode rejects them
+ok 99 - payload lengths 0..11 are valid without telemetry; direct telemetry decode rejects them
+  ---
+  duration_ms: 1.783
+  type: 'test'
+  ...
+# Subtest: full-capacity payload is preserved and its first 12 bytes decode as telemetry
+ok 100 - full-capacity payload is preserved and its first 12 bytes decode as telemetry
+  ---
+  duration_ms: 0.3692
+  type: 'test'
+  ...
+# Subtest: encoding and decoding do not mutate or alias caller payload storage
+ok 101 - encoding and decoding do not mutate or alias caller payload storage
+  ---
+  duration_ms: 0.3026
+  type: 'test'
+  ...
+# Subtest: builder prepends exact ASM outside the 256-byte valid body
+ok 102 - builder prepends exact ASM outside the 256-byte valid body
+  ---
+  duration_ms: 3.6465
+  type: 'test'
+  ...
+# Subtest: frame generator starts at zero and advances exactly once per generated unit
+ok 103 - frame generator starts at zero and advances exactly once per generated unit
+  ---
+  duration_ms: 7.8053
+  type: 'test'
+  ...
+# Subtest: generated sequences wrap from uint32 maximum to zero
+ok 104 - generated sequences wrap from uint32 maximum to zero
+  ---
+  duration_ms: 1.0523
+  type: 'test'
+  ...
+# Subtest: mock telemetry remains deterministic and fits wire fields throughout sequence range
+ok 105 - mock telemetry remains deterministic and fits wire fields throughout sequence range
+  ---
+  duration_ms: 2.8018
+  type: 'test'
+  ...
+# Subtest: invalid initial sequence values are rejected
+ok 106 - invalid initial sequence values are rejected
+  ---
+  duration_ms: 0.8467
+  type: 'test'
+  ...
+# Subtest: 100-frame direct packetizer -> synchronizer integration recovers exact ordered telemetry
+ok 107 - 100-frame direct packetizer -> synchronizer integration recovers exact ordered telemetry
+  ---
+  duration_ms: 17.6773
+  type: 'test'
+  ...
+# Subtest: explicit 2-byte chunks split ASM and spread the frame body over 128 chunks
+ok 108 - explicit 2-byte chunks split ASM and spread the frame body over 128 chunks
+  ---
+  duration_ms: 1.4425
+  type: 'test'
+  ...
+# Subtest: one chunk mixes preceding frame tail, next ASM, and next frame body
+ok 109 - one chunk mixes preceding frame tail, next ASM, and next frame body
+  ---
+  duration_ms: 0.4954
+  type: 'test'
+  ...
+# Subtest: live packetizer preserves pending tail across separately generated frames
+ok 110 - live packetizer preserves pending tail across separately generated frames
+  ---
+  duration_ms: 0.6201
+  type: 'test'
+  ...
+# Subtest: real UDP: explicit ASM split and 128 body datagrams recover one frame
+ok 111 - real UDP: explicit ASM split and 128 body datagrams recover one frame
+  ---
+  duration_ms: 243.5443
+  type: 'test'
+  ...
+# Subtest: real UDP: 100 clean frames survive seeded 1..96-byte datagrams in order
+ok 112 - real UDP: 100 clean frames survive seeded 1..96-byte datagrams in order
+  ---
+  duration_ms: 506.901
+  type: 'test'
+  ...
+# Subtest: real UDP: boundary mixing and multiple complete units in a datagram preserve order
+ok 113 - real UDP: boundary mixing and multiple complete units in a datagram preserve order
+  ---
+  duration_ms: 10.5524
+  type: 'test'
+  ...
+# Subtest: real UDP: partial candidate stays LOCK between messages until its last byte arrives
+ok 114 - real UDP: partial candidate stays LOCK between messages until its last byte arrives
+  ---
+  duration_ms: 6.5067
+  type: 'test'
+  ...
+# Subtest: receiver reports bind conflicts and socket close is idempotent
+ok 115 - receiver reports bind conflicts and socket close is idempotent
+  ---
+  duration_ms: 8.7477
+  type: 'test'
+  ...
+# Subtest: guided clean: production engine records real CRC evidence and expected alignment
+ok 116 - guided clean: production engine records real CRC evidence and expected alignment
+  ---
+  duration_ms: 14.1796
+  type: 'test'
+  ...
+# Subtest: guided bit-offset: production engine records real CRC evidence and expected alignment
+ok 117 - guided bit-offset: production engine records real CRC evidence and expected alignment
+  ---
+  duration_ms: 4.5921
+  type: 'test'
+  ...
+# Subtest: guided bit-flip: production engine records real CRC evidence and expected alignment
+ok 118 - guided bit-flip: production engine records real CRC evidence and expected alignment
+  ---
+  duration_ms: 4.2147
+  type: 'test'
+  ...
+# Subtest: guided bit-insert: production engine records real CRC evidence and expected alignment
+ok 119 - guided bit-insert: production engine records real CRC evidence and expected alignment
+  ---
+  duration_ms: 6.9399
+  type: 'test'
+  ...
+# Subtest: guided bit-delete: production engine records real CRC evidence and expected alignment
+ok 120 - guided bit-delete: production engine records real CRC evidence and expected alignment
+  ---
+  duration_ms: 2.4372
+  type: 'test'
+  ...
+# Subtest: unknown lesson modes cannot construct a recording
+ok 121 - unknown lesson modes cannot construct a recording
+  ---
+  duration_ms: 0.8019
+  type: 'test'
+  ...
+# Subtest: WebSocket lesson request leaves live receiver untouched; live traces contain actual datagram bytes
+ok 122 - WebSocket lesson request leaves live receiver untouched; live traces contain actual datagram bytes
+  ---
+  duration_ms: 279.7994
+  type: 'test'
+  ...
+# Subtest: METRIC-1 normal progression
+ok 123 - METRIC-1 normal progression
+  ---
+  duration_ms: 1.9712
+  type: 'test'
+  ...
+# Subtest: METRIC-2 one missing frame
+ok 124 - METRIC-2 one missing frame
+  ---
+  duration_ms: 0.3628
+  type: 'test'
+  ...
+# Subtest: METRIC-3 several missing frames
+ok 125 - METRIC-3 several missing frames
+  ---
+  duration_ms: 0.3671
+  type: 'test'
+  ...
+# Subtest: METRIC-4 uint32 wraparound
+ok 126 - METRIC-4 uint32 wraparound
+  ---
+  duration_ms: 0.5208
+  type: 'test'
+  ...
+# Subtest: METRIC-5 duplicates preserve forward baseline
+ok 127 - METRIC-5 duplicates preserve forward baseline
+  ---
+  duration_ms: 0.5441
+  type: 'test'
+  ...
+# Subtest: METRIC-6 older observations preserve forward baseline
+ok 128 - METRIC-6 older observations preserve forward baseline
+  ---
+  duration_ms: 0.7308
+  type: 'test'
+  ...
+# Subtest: gap across uint32 wraparound
+ok 129 - gap across uint32 wraparound
+  ---
+  duration_ms: 0.2988
+  type: 'test'
+  ...
+# Subtest: older observations around wraparound
+ok 130 - older observations around wraparound
+  ---
+  duration_ms: 2.1947
+  type: 'test'
+  ...
+# Subtest: half-range ambiguous observation ignored
+ok 131 - half-range ambiguous observation ignored
+  ---
+  duration_ms: 1.9598
+  type: 'test'
+  ...
+# Subtest: METRIC-7 rates use counter deltas and controlled elapsed time, then decay to zero
+ok 132 - METRIC-7 rates use counter deltas and controlled elapsed time, then decay to zero
+  ---
+  duration_ms: 1.9898
+  type: 'test'
+  ...
+# Subtest: zero elapsed rate sample stays finite and preserves unconsumed count delta
+ok 133 - zero elapsed rate sample stays finite and preserves unconsumed count delta
+  ---
+  duration_ms: 1.0255
+  type: 'test'
+  ...
+# Subtest: synced reflects all four FSM states and snapshots do not own duplicate counters
+ok 134 - synced reflects all four FSM states and snapshots do not own duplicate counters
+  ---
+  duration_ms: 2.7208
+  type: 'test'
+  ...
+# Subtest: metrics reuse authoritative resync count; only extracted valid sequences create gaps
+ok 135 - metrics reuse authoritative resync count; only extracted valid sequences create gaps
+  ---
+  duration_ms: 9.153
+  type: 'test'
+  ...
+# Subtest: receiver configuration adds localhost WebSocket default and validates WS_PORT
+ok 136 - receiver configuration adds localhost WebSocket default and validates WS_PORT
+  ---
+  duration_ms: 2.6995
+  type: 'test'
+  ...
+# Subtest: PACKET-1: concatenate packetized bytes to recover the exact source
+ok 137 - PACKET-1: concatenate packetized bytes to recover the exact source
+  ---
+  duration_ms: 7.1118
+  type: 'test'
+  ...
+# Subtest: PACKET-2: same seed and bounds produce identical boundaries and bytes
+ok 138 - PACKET-2: same seed and bounds produce identical boundaries and bytes
+  ---
+  duration_ms: 1.4232
+  type: 'test'
+  ...
+# Subtest: PACKET-3: fixed different seeds produce different schedules with exact reassembly
+ok 139 - PACKET-3: fixed different seeds produce different schedules with exact reassembly
+  ---
+  duration_ms: 1.5133
+  type: 'test'
+  ...
+# Subtest: PACKET-4: bounds hold and a finite final tail may be shorter than min
+ok 140 - PACKET-4: bounds hold and a finite final tail may be shorter than min
+  ---
+  duration_ms: 1.2289
+  type: 'test'
+  ...
+# Subtest: PACKET-5: tiny 1..3 byte chunks preserve the complete stream
+ok 141 - PACKET-5: tiny 1..3 byte chunks preserve the complete stream
+  ---
+  duration_ms: 4.2405
+  type: 'test'
+  ...
+# Subtest: streaming append boundaries do not change seeded packetization
+ok 142 - streaming append boundaries do not change seeded packetization
+  ---
+  duration_ms: 4.1174
+  type: 'test'
+  ...
+# Subtest: seed zero and uint32 maximum are deterministic valid seeds
+ok 143 - seed zero and uint32 maximum are deterministic valid seeds
+  ---
+  duration_ms: 1.7677
+  type: 'test'
+  ...
+# Subtest: invalid chunk bounds and seeds fail before packetization
+ok 144 - invalid chunk bounds and seeds fail before packetization
+  ---
+  duration_ms: 0.9751
+  type: 'test'
+  ...
+# Subtest: empty input produces no datagrams and packetized storage does not alias input
+ok 145 - empty input produces no datagrams and packetized storage does not alias input
+  ---
+  duration_ms: 0.7062
+  type: 'test'
+  ...
+# Subtest: SYNC-1: clean aligned frame traverses all four explicit FSM states
+ok 146 - SYNC-1: clean aligned frame traverses all four explicit FSM states
+  ---
+  duration_ms: 4.3738
+  type: 'test'
+  ...
+# Subtest: SYNC-2: ignores noise and reports the logical ASM position
+ok 147 - SYNC-2: ignores noise and reports the logical ASM position
+  ---
+  duration_ms: 1.1098
+  type: 'test'
+  ...
+# Subtest: SYNC-3: recovers exact frame and telemetry at alignment 0 with one-byte chunks
+ok 148 - SYNC-3: recovers exact frame and telemetry at alignment 0 with one-byte chunks
+  ---
+  duration_ms: 1.5735
+  type: 'test'
+  ...
+# Subtest: SYNC-3: recovers exact frame and telemetry at alignment 1 with one-byte chunks
+ok 149 - SYNC-3: recovers exact frame and telemetry at alignment 1 with one-byte chunks
+  ---
+  duration_ms: 2.4328
+  type: 'test'
+  ...
+# Subtest: SYNC-3: recovers exact frame and telemetry at alignment 2 with one-byte chunks
+ok 150 - SYNC-3: recovers exact frame and telemetry at alignment 2 with one-byte chunks
+  ---
+  duration_ms: 1.2124
+  type: 'test'
+  ...
+# Subtest: SYNC-3: recovers exact frame and telemetry at alignment 3 with one-byte chunks
+ok 151 - SYNC-3: recovers exact frame and telemetry at alignment 3 with one-byte chunks
+  ---
+  duration_ms: 1.1783
+  type: 'test'
+  ...
+# Subtest: SYNC-3: recovers exact frame and telemetry at alignment 4 with one-byte chunks
+ok 152 - SYNC-3: recovers exact frame and telemetry at alignment 4 with one-byte chunks
+  ---
+  duration_ms: 1.2223
+  type: 'test'
+  ...
+# Subtest: SYNC-3: recovers exact frame and telemetry at alignment 5 with one-byte chunks
+ok 153 - SYNC-3: recovers exact frame and telemetry at alignment 5 with one-byte chunks
+  ---
+  duration_ms: 0.9485
+  type: 'test'
+  ...
+# Subtest: SYNC-3: recovers exact frame and telemetry at alignment 6 with one-byte chunks
+ok 154 - SYNC-3: recovers exact frame and telemetry at alignment 6 with one-byte chunks
+  ---
+  duration_ms: 0.979
+  type: 'test'
+  ...
+# Subtest: SYNC-3: recovers exact frame and telemetry at alignment 7 with one-byte chunks
+ok 155 - SYNC-3: recovers exact frame and telemetry at alignment 7 with one-byte chunks
+  ---
+  duration_ms: 1.4272
+  type: 'test'
+  ...
+# Subtest: SYNC-4: ASM split over four pushes persists until frame completion
+ok 156 - SYNC-4: ASM split over four pushes persists until frame completion
+  ---
+  duration_ms: 0.6199
+  type: 'test'
+  ...
+# Subtest: SYNC-5: emits only when enough fragmented frame bytes have arrived
+ok 157 - SYNC-5: emits only when enough fragmented frame bytes have arrived
+  ---
+  duration_ms: 0.4322
+  type: 'test'
+  ...
+# Subtest: SYNC-6: CRC failure rejects the candidate and later reacquires without restart
+ok 158 - SYNC-6: CRC failure rejects the candidate and later reacquires without restart
+  ---
+  duration_ms: 2.5417
+  type: 'test'
+  ...
+# Subtest: SYNC-7: false ASM in noise fails and a later true candidate is recovered
+ok 159 - SYNC-7: false ASM in noise fails and a later true candidate is recovered
+  ---
+  duration_ms: 1.1252
+  type: 'test'
+  ...
+# Subtest: critical recovery: real ASM inside the failed candidate survives the one-bit restart
+ok 160 - critical recovery: real ASM inside the failed candidate survives the one-bit restart
+  ---
+  duration_ms: 0.6898
+  type: 'test'
+  ...
+# Subtest: SYNC-8: extracts consecutive frames in order with direct EXTRACT -> LOCK transitions
+ok 161 - SYNC-8: extracts consecutive frames in order with direct EXTRACT -> LOCK transitions
+  ---
+  duration_ms: 0.4295
+  type: 'test'
+  ...
+# Subtest: SYNC-9: incomplete candidate stays LOCK across empty and partial pushes
+ok 162 - SYNC-9: incomplete candidate stays LOCK across empty and partial pushes
+  ---
+  duration_ms: 0.2197
+  type: 'test'
+  ...
+# Subtest: SYNC-10: CRC-valid malformed length triggers format rejection and one-bit reacquisition
+ok 163 - SYNC-10: CRC-valid malformed length triggers format rejection and one-bit reacquisition
+  ---
+  duration_ms: 1.0746
+  type: 'test'
+  ...
+# Subtest: SYNC-11: long noise retains exactly 31 bits and bounded backing storage, then recovers
+ok 164 - SYNC-11: long noise retains exactly 31 bits and bounded backing storage, then recovers
+  ---
+  duration_ms: 185.7046
+  type: 'test'
+  ...
+# Subtest: tail retention preserves an ASM whose first bit was in the preceding push
+ok 165 - tail retention preserves an ASM whose first bit was in the preceding push
+  ---
+  duration_ms: 0.7278
+  type: 'test'
+  ...
+# Subtest: alignment remains relative to stream origin after compaction and inter-frame noise
+ok 166 - alignment remains relative to stream origin after compaction and inter-frame noise
+  ---
+  duration_ms: 3.9581
+  type: 'test'
+  ...
+# Subtest: large single push over 64 KiB recovers all frames without crossing the storage cap
+ok 167 - large single push over 64 KiB recovers all frames without crossing the storage cap
+  ---
+  duration_ms: 17.2754
+  type: 'test'
+  ...
+# Subtest: 100 clean frames survive an explicit reproducible schedule of 1..96-byte chunks
+ok 168 - 100 clean frames survive an explicit reproducible schedule of 1..96-byte chunks
+  ---
+  duration_ms: 7.8908
+  type: 'test'
+  ...
+# Subtest: resyncCount records one reacquisition per failed candidate, including another false lock
+ok 169 - resyncCount records one reacquisition per failed candidate, including another false lock
+  ---
+  duration_ms: 0.6401
+  type: 'test'
+  ...
+# Subtest: short meaningful payload remains a valid frame without invented telemetry
+ok 170 - short meaningful payload remains a valid frame without invented telemetry
+  ---
+  duration_ms: 0.3687
+  type: 'test'
+  ...
+# Subtest: statistics snapshots cannot mutate synchronizer counters
+ok 171 - statistics snapshots cannot mutate synchronizer counters
+  ---
+  duration_ms: 0.1961
+  type: 'test'
+  ...
+# Subtest: defensive capacity fault abandons an incomplete candidate and recovers in the current batch
+ok 172 - defensive capacity fault abandons an incomplete candidate and recovers in the current batch
+  ---
+  duration_ms: 3.1427
+  type: 'test'
+  ...
+# Subtest: UI derives failure and recovery even if both status samples are LOCK
+ok 173 - UI derives failure and recovery even if both status samples are LOCK
+  ---
+  duration_ms: 3.5031
+  type: 'test'
+  ...
+# Subtest: UI distinguishes sampled HUNT and absent alignment, avoids artificial reset events
+ok 174 - UI distinguishes sampled HUNT and absent alignment, avoids artificial reset events
+  ---
+  duration_ms: 0.88
+  type: 'test'
+  ...
+# Subtest: UI event history retains only newest 20 observations without mutating old list
+ok 175 - UI event history retains only newest 20 observations without mutating old list
+  ---
+  duration_ms: 0.5541
+  type: 'test'
+  ...
+# Subtest: WS-1/2: client connects and periodic status has exact PRD metric keys and ISO UTC time
+ok 176 - WS-1/2: client connects and periodic status has exact PRD metric keys and ISO UTC time
+  ---
+  duration_ms: 298.3976
+  type: 'test'
+  ...
+# Subtest: WS-3/4: exact valid telemetry broadcasts to multiple clients; disconnect and zero clients are isolated
+ok 177 - WS-3/4: exact valid telemetry broadcasts to multiple clients; disconnect and zero clients are isolated
+  ---
+  duration_ms: 57.8125
+  type: 'test'
+  ...
+# Subtest: status cadence is bounded while valid frames publish immediately
+ok 178 - status cadence is bounded while valid frames publish immediately
+  ---
+  duration_ms: 1257.7201
+  type: 'test'
+  ...
+# Subtest: bridge suppresses invalid frames but publishes short valid frames without invented telemetry
+ok 179 - bridge suppresses invalid frames but publishes short valid frames without invented telemetry
+  ---
+  duration_ms: 0.7252
+  type: 'test'
+  ...
+# Subtest: real UDP -> WebSocket publishes every valid payload length 0..11 with exact keys
+ok 180 - real UDP -> WebSocket publishes every valid payload length 0..11 with exact keys
+  ---
+  duration_ms: 138.3905
+  type: 'test'
+  ...
+# Subtest: real UDP -> WebSocket: clean exposes valid-only telemetry, gaps, CRC and recovery
+ok 181 - real UDP -> WebSocket: clean exposes valid-only telemetry, gaps, CRC and recovery
+  ---
+  duration_ms: 267.8377
+  type: 'test'
+  ...
+# Subtest: real UDP -> WebSocket: bit-flip exposes valid-only telemetry, gaps, CRC and recovery
+ok 182 - real UDP -> WebSocket: bit-flip exposes valid-only telemetry, gaps, CRC and recovery
+  ---
+  duration_ms: 265.8578
+  type: 'test'
+  ...
+# Subtest: real UDP -> WebSocket: bit-insert exposes valid-only telemetry, gaps, CRC and recovery
+ok 183 - real UDP -> WebSocket: bit-insert exposes valid-only telemetry, gaps, CRC and recovery
+  ---
+  duration_ms: 282.2302
+  type: 'test'
+  ...
+# Subtest: real UDP -> WebSocket: bit-delete exposes valid-only telemetry, gaps, CRC and recovery
+ok 184 - real UDP -> WebSocket: bit-delete exposes valid-only telemetry, gaps, CRC and recovery
+  ---
+  duration_ms: 782.5891
+  type: 'test'
+  ...
+# [WS] listen EADDRINUSE: address already in use 127.0.0.1:49302
+# Subtest: WebSocket bind failure rejects startup and releases its UDP socket
+ok 185 - WebSocket bind failure rejects startup and releases its UDP socket
+  ---
+  duration_ms: 24.9429
+  type: 'test'
+  ...
+1..185
+# tests 185
+# suites 0
+# pass 185
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6689.0814

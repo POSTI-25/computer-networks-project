@@ -1,0 +1,9 @@
+{
+  "verifiedAt": "2026-10-25T22:30:20.4495004+05:30",
+  "sourceRevision": "a446017bf45931a7b4c80b740c204d712097ef18",
+  "node": "v22.19.0",
+  "npm": "10.9.3",
+  "testsExitCode": 0,
+  "typecheckExitCode": 0,
+  "buildExitCode": 0
+}

@@ -35,6 +35,8 @@ project-owned CRC/BitBuffer, `ws`, Vite, vanilla HTML/CSS/TypeScript, and `node:
 One package; `ws` is the only external runtime dependency.
 
 ```text
+git clone https://github.com/POSTI-25/computer-networks-project.git
+cd computer-networks-project
 npm ci
 ```
 
@@ -180,5 +182,33 @@ does not repair them, and can theoretically miss some corruption/false candidate
 No retransmission, FEC, reorder restoration, RF hardware, database, authentication,
 cloud service, frontend framework, or persistent history is required or implemented.
 Optional datagram drop/reorder/duplicate modes and charts are outside this MVP.
-Manual screenshots/inspection records stay ignored under `dist/`; the audit document
-is the submission evidence. Build/dependency/editor artifacts are ignored.
+Build/dependency/editor artifacts are ignored. Submission screenshots are tracked
+under `docs/screenshots/`; saved verification logs are under `docs/verification/`.
+
+## Faculty verification and submission evidence
+
+**Jahnavi Singh, 24BCE2055**
+
+**Slot F2, Team 5 (sole member)**
+**BCSE308P Computer Networks Lab, Fall Semester 2026-27**
+Submitted to: **Sreethar S.**
+
+| Evidence | Location |
+|---|---|
+| Final project report | [F2_Team5_Report.pdf](F2_Team5_Report.pdf) |
+| Project presentation | [PowerPoint](F2_Team5_PPT.pptx) or [PDF preview](F2_Team5_PPT.pdf) |
+| Assignment 10 repository document and dashboard screenshots | [F2_Team5_Github.pdf](F2_Team5_Github.pdf) |
+| Complete transmitter, receiver and shared implementation | [`src/`](src/) |
+| Dashboard source and Vite configuration | [`ui/`](ui/) |
+| Dependency manifest, exact lockfile and runtime version | `package.json`, `package-lock.json`, `.nvmrc` |
+| Dashboard screenshots and one description per image | [Screenshot gallery](docs/screenshots/README.md) |
+| Saved automated test, typecheck and build output | [Verification record](docs/verification/README.md) |
+| Guided and live demonstration procedure | [Demo guide](docs/demo-guide.md) |
+| Requirement mapping and VTOP submission procedure | [Submission guide](docs/submission-guide.md) |
+| Detailed implementation and earlier acceptance audit | [PRD audit](docs/prd-audit.md) |
+
+This is a Node.js software simulation. There is no Cisco Packet Tracer topology,
+`.pkt` file, database, or Visual Studio solution to supply. The transmitter,
+impairment simulator, UDP receiver and browser dashboard source are the executable
+project. `npm ci` restores dependencies; generated `dist/` and `node_modules/`
+directories are intentionally excluded from version control.
